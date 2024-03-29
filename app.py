@@ -37,7 +37,24 @@ def admin():
         flash('Mentor and timeslots registered successfully!', 'success')
         return redirect(url_for('admin'))
     
-    return render_template('admin.html', form=form)
+    # Query all mentors and their timeslots
+    mentors_with_timeslots = Mentor.query.all()
+
+    # Prepare data for the template
+    mentors_data = []
+    for mentor in mentors_with_timeslots:
+        timeslots = ', '.join([str(timeslot.timeslot) for timeslot in mentor.timeslots])
+        mentors_data.append({'mentor': mentor, 'timeslots': timeslots})
+    
+        mentees_with_rankings = Mentee.query.all()
+
+    # Prepare data for the template
+    mentees_data = []
+    for mentee in mentees_with_rankings:
+        rankings = {rating.mentor_id: rating.rating for rating in mentee.ratings}
+        mentees_data.append({'mentee': mentee, 'rankings': rankings})
+
+    return render_template('admin.html', form=form, mentors_data=mentors_data, mentees_data=mentees_data)
 
 @app.route('/generate_qr')
 def generate_qr():

@@ -1,10 +1,42 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Admin Interface</title>
+    <style>
+        .container {
+            display: flex;
+            justify-content: space-around;
+            align-items: flex-start;
+        }
+
+        .table-container {
+            width: 45%;
+            /* Adjust width as necessary */
+            margin: 0 10px;
+            /* Optional spacing between tables */
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th,
+        td {
+            border: 1px solid #dddddd;
+            text-align: left;
+            padding: 8px;
+        }
+
+        th {
+            background-color: #f2f2f2;
+        }
+    </style>
 </head>
+
 <body>
     <h2>Register Mentor</h2>
     <form action="" method="post">
@@ -23,5 +55,47 @@
         </p>
         <p>{{ form.submit() }}</p>
     </form>
+
+
+    <div class="container">
+        <div class="table-container"></div>
+        <!-- Mentor Table -->
+        <table>
+            <tr>
+                <th>Mentor Name</th>
+                <th>Job Description</th>
+                <th>Available Timeslots</th>
+            </tr>
+            {% for mentor in mentors_data %}
+            <tr>
+                <td>{{ mentor.mentor.name }}</td>
+                <td>{{ mentor.mentor.job_description }}</td>
+                <td>{{ mentor.timeslots }}</td>
+            </tr>
+            {% endfor %}
+        </table>
+    </div>
+
+    <div class="table-container">
+        <!-- Mentee Table -->
+        <table>
+            <tr>
+                <th>Mentee Name</th>
+                {% for mentor in mentors_data %}
+                <th>Ranking for {{ mentor.mentor.name }}</th>
+                {% endfor %}
+            </tr>
+            {% for mentee in mentees_data %}
+            <tr>
+                <td>{{ mentee.mentee.name }}</td>
+                {% for mentor in mentors_data %}
+                <td>{{ mentee.rankings.get(mentor.mentor.id, 'N/A') }}</td>
+                {% endfor %}
+            </tr>
+            {% endfor %}
+        </table>
+    </div>
+    </div>
 </body>
+
 </html>
