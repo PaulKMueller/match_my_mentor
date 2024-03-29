@@ -14,7 +14,6 @@ app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['SECRET_KEY'] = "my_secret_key"
 db = SQLAlchemy(app)
 
-
 @app.route("/")
 def hello_world():
     return "<p>Hello, World!</p>"
@@ -86,30 +85,34 @@ def mentee_form():
     mentors = Mentor.query.all()
     
     if not form.is_submitted():
-        form.mentor_ratings.min_entries = len(mentors)
         for mentor in mentors:
             mentor_form = MentorRatingForm()
-            mentor_form.rating.label = f'Rating for {mentor.name}'
             form.mentor_ratings.append_entry(mentor_form)
+
+        mentor_names = [mentor.name for mentor in mentors]
+        mentors_and_forms = zip(mentor_names, form.mentor_ratings)
+
+        return render_template('mentee_form.html', form=form, mentors_and_forms=mentors_and_forms)
     else:
-        # If the form has been submitted, we process the form
+        # Form submission logic remains the same
         if form.validate_on_submit():
-            # Create a new Mentee instance
             mentee = Mentee(name=form.name.data)
             db.session.add(mentee)
             db.session.commit()  # Commit to get the mentee ID
 
             for mentor_form, mentor in zip(form.mentor_ratings.entries, mentors):
-                rating_value = mentor_form.rating.data
-                if rating_value:  # Assuming 0 means no rating given
+                rating_value = mentor_form.form.rating.data
+                if rating_value:  # Assuming '0' means no rating given
                     rating = Rating(mentee_id=mentee.id, mentor_id=mentor.id, rating=rating_value)
                     db.session.add(rating)
 
             db.session.commit()
             flash('Preferences submitted successfully!', 'success')
-            return redirect(url_for('confirmation_page'))  # Redirect to a confirmation page or some other page
+            return redirect(url_for('confirmation_page'))
 
-    return render_template('mentee_form.html', form=form, mentors=mentors)
+    # If form not submitted, re-fetch mentors for consistency
+    return render_template('mentee_form.html', form=form, mentors_and_forms=zip([], []))
+
 
 
 class Mentor(db.Model):
@@ -137,3 +140,6 @@ class Rating(db.Model):
 
 with app.app_context():
     db.create_all()
+
+if __name__ == "__main__":
+    app.run(host='0.0.0.0', port=5000) 

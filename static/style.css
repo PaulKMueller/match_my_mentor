@@ -1,0 +1,58 @@
+body, html {
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    font-family: Arial, sans-serif;
+    background-color: #f5f5f5;
+}
+
+.container {
+    width: 100%;
+    max-width: 360px;
+    padding: 20px;
+    box-sizing: border-box; /* Includes padding in the width calculation */
+}
+
+.mentee-form {
+    font-size: 18px; /* Adjusted for better readability */
+    background-color: white;
+    padding: 20px;
+    margin: 0 auto; /* Centering horizontally */
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.form-group {
+    width: 100%; /* Ensures form elements use full width */
+    margin-bottom: 20px;
+    text-align: center;
+}
+
+.select-rating, .submit-btn {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ddd;
+    margin-top: 5px;
+    box-sizing: border-box; /* Includes padding and border in the width calculation */
+}
+
+.submit-btn {
+    background-color: #007bff;
+    color: white;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+@media (max-width: 600px) {
+    .mentee-form {
+        font-size: 16px; /* Slightly smaller font for very small devices */
+    }
+}

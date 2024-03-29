@@ -6,40 +6,47 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Admin Interface</title>
     <style>
+        body {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            margin: 0;
+        }
         .container {
+            width: 80%; /* Adjust based on your preference */
+            max-width: 1200px; /* Maximum width of the container */
+        }
+        .table-container {
             display: flex;
             justify-content: space-around;
-            align-items: flex-start;
+            flex-wrap: wrap;
+            margin-top: 20px;
         }
-
-        .table-container {
-            width: 45%;
-            /* Adjust width as necessary */
-            margin: 0 10px;
-            /* Optional spacing between tables */
-        }
-
         table {
-            width: 100%;
             border-collapse: collapse;
+            width: 100%; /* You can adjust this or set max-width */
         }
-
-        th,
-        td {
+        th, td {
             border: 1px solid #dddddd;
             text-align: left;
             padding: 8px;
         }
-
         th {
             background-color: #f2f2f2;
         }
+        form {
+            /* Additional styles for your form if needed */
+            margin-bottom: 20px; /* Space between the form and the tables */
+        }
     </style>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css" rel="stylesheet">
 </head>
 
 <body>
     <h2>Register Mentor</h2>
-    <form action="" method="post">
+    <form action="" method="post", class="input-field">
         {{ form.hidden_tag() }}
         <p>
             {{ form.name.label }}<br>
@@ -60,7 +67,7 @@
     <div class="container">
         <div class="table-container"></div>
         <!-- Mentor Table -->
-        <table>
+        <table class="striped">
             <tr>
                 <th>Mentor Name</th>
                 <th>Job Description</th>
@@ -78,7 +85,7 @@
 
     <div class="table-container">
         <!-- Mentee Table -->
-        <table>
+        <table class="striped">
             <tr>
                 <th>Mentee Name</th>
                 {% for mentor in mentors_data %}
@@ -96,6 +103,14 @@
         </table>
     </div>
     </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            var elems = document.querySelectorAll('select');
+            var instances = M.FormSelect.init(elems);
+        });
+        </script>
 </body>
 
 </html>

@@ -3,27 +3,38 @@
 
 <head>
     <meta charset="UTF-8">
-    <meta viewport="width=device-width, initial-scale=1.0">
-    <title>Mentee Preferences</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mentee Form</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css" rel="stylesheet">
 </head>
 
 <body>
-    <h2>Mentee Preferences</h2>
-    <form method="POST">
-        {{ form.hidden_tag() }}
-        <div>
-            {{ form.name.label }}<br>
-            {{ form.name(size=32) }}
-        </div>
-        {% for mentor_form in form.mentor_ratings %}
-            {{ mentor_form.hidden_tag() }}
-            <div>
-                {{ mentor_form.rating.label }}<br>
-                {{ mentor_form.rating() }}
+    <div class="container" style="padding-top: 20px;">
+        <form action="" method="post" class="mentee-form">
+            {{ form.hidden_tag() }}
+            <div class="input-field">
+                {{ form.name.label(class="active") }}
+                {{ form.name(class="validate") }}
             </div>
-        {% endfor %}
-        <div>{{ form.submit() }}</div>
-    </form>
+            {% for mentor_name, mentor_form in mentors_and_forms %}
+            <div class="input-field">
+                <label>{{ mentor_name }}</label> <!-- Keep this for mentor name display -->
+                {{ mentor_form.rating(class="") }} <!-- Remove 'browser-default' to allow Materialize styling -->
+            </div>
+            {% endfor %}
+            <button type="submit" class="btn waves-effect waves-light">Submit
+                <i class="material-icons right">send</i>
+            </button>
+        </form>
+    </div>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            var elems = document.querySelectorAll('select');
+            M.FormSelect.init(elems);
+        });
+    </script>
 </body>
 
 </html>
