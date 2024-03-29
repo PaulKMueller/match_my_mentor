@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mentee Form</title>
+</head>
+<body>
+    <h2>Mentee Preferences</h2>
+    <form action="" method="post">
+        {{ form.hidden_tag() }}
+        <p>
+            {{ form.name.label }}<br>
+            {{ form.name(size=32) }}
+        </p>
+        <!-- Add other fields for ratings here -->
+        <p>{{ form.submit() }}</p>
+    </form>
+</body>
+</html>
