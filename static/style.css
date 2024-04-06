@@ -9,20 +9,25 @@ body, html {
     align-items: center;
     font-family: Arial, sans-serif;
     background-color: #f5f5f5;
+    box-sizing: border-box; /* Ensures that padding is included in total width and height */
 }
 
 .container {
-    width: 100%;
-    max-width: 360px;
+    width: 80%;
+    max-width: 720px; /* This is the default max-width, which will be overridden for larger screens in the media query below */
     padding: 20px;
-    box-sizing: border-box; /* Includes padding in the width calculation */
+    margin: auto; /* Center the container on the page */
+}
+
+.mentee-form, .form-group, .select-rating, .submit-btn, form {
+    width: 100%; /* Ensures these elements use full width */
 }
 
 .mentee-form {
-    font-size: 18px; /* Adjusted for better readability */
+    font-size: 18px; /* Default font size for readability */
     background-color: white;
     padding: 20px;
-    margin: 0 auto; /* Centering horizontally */
+    margin: 0 auto; /* Centers the form horizontally */
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -31,17 +36,14 @@ body, html {
 }
 
 .form-group {
-    width: 100%; /* Ensures form elements use full width */
     margin-bottom: 20px;
     text-align: center;
 }
 
 .select-rating, .submit-btn {
-    width: 100%;
     padding: 10px;
     border: 1px solid #ddd;
     margin-top: 5px;
-    box-sizing: border-box; /* Includes padding and border in the width calculation */
 }
 
 .submit-btn {
@@ -51,8 +53,72 @@ body, html {
     cursor: pointer;
 }
 
+.qr-container {
+    display: flex;
+    justify-content: space-around;
+}
+
+.qr-item {
+    text-align: center;
+    margin: 10px 100px;
+}
+
+.table-container {
+    display: flex;
+    justify-content: space-around;
+    flex-wrap: wrap;
+    margin-top: 20px;
+}
+
+table {
+    border-collapse: collapse;
+}
+
+th, td {
+    border: 1px solid #dddddd;
+    text-align: left;
+    padding: 8px;
+}
+
+th {
+    background-color: #f2f2f2;
+}
+
+/* Label and input field styling */
+.mentor-name-label, .input-field label.active {
+    font-size: 1.5rem; /* Unified font size for labels */
+}
+
+.mentor-name-label, .mentor-rating-select {
+    display: flex;
+    align-items: center;
+    margin-right: 1rem;
+}
+
+.input-field {
+    margin: 0; /* Removes both top and bottom margins for alignment */
+}
+
+/* Responsive font sizes */
 @media (max-width: 600px) {
     .mentee-form {
         font-size: 16px; /* Slightly smaller font for very small devices */
+    }
+}
+
+/* Container width adjustments for larger screens */
+@media (min-width: 992px) {
+    .container {
+        max-width: 960px; /* Allows the container to be wider on larger screens */
+    }
+}
+
+/* Column adjustments for non-mobile screens */
+@media screen and (min-width: 601px) {
+    .select-label {
+        width: 30%; /* Adjust label width as necessary */
+    }
+    .input-field {
+        width: 70%;
     }
 }

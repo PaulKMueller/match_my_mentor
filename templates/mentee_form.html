@@ -10,31 +10,40 @@
 </head>
 
 <body>
-    <div class="container" style="padding-top: 20px;">
+    <div class="container">
         <form action="" method="post" class="mentee-form">
             {{ form.hidden_tag() }}
-            <div class="input-field">
-                {{ form.name.label(class="active") }}
-                {{ form.name(class="validate") }}
+            <div class="row">
+                <div class="input-field col s12">
+                    {{ form.name.label(class="active") }}
+                    {{ form.name(class="validate") }}
+                </div>
             </div>
             {% for mentor_name, mentor_form in mentors_and_forms %}
-            <div class="input-field">
-                <label>{{ mentor_name }}</label> <!-- Keep this for mentor name display -->
-                {{ mentor_form.rating(class="") }} <!-- Remove 'browser-default' to allow Materialize styling -->
+            <div class="row">
+                <div class="col s6 m4 l3 select-label">
+                    <label for="{{ mentor_form.rating.id }}">{{ mentor_name }}</label>
+                </div>
+                <div class="input-field col s6 m8 l9">
+                    {{ mentor_form.rating(class="", id=mentor_form.rating.id) }} <!-- Ensure the 'id' is set so the label 'for' attribute works -->
+                </div>
             </div>
             {% endfor %}
-            <button type="submit" class="btn waves-effect waves-light">Submit
-                <i class="material-icons right">send</i>
-            </button>
+            <div class="row">
+                <div class="col s12">
+                    <button type="submit" class="btn waves-effect waves-light">Submit
+                        <i class="material-icons right">send</i>
+                    </button>
+                </div>
+            </div>
         </form>
     </div>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            var elems = document.querySelectorAll('select');
-            M.FormSelect.init(elems);
+            M.FormSelect.init(document.querySelectorAll('select'));
         });
-    </script>
+        </script>
 </body>
 
 </html>
