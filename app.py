@@ -7,7 +7,7 @@ from io import BytesIO
 from wtforms import StringField, IntegerField, TextAreaField, SubmitField, SelectField
 from wtforms.validators import DataRequired, NumberRange, Optional
 import base64
-from models import db, Mentee, Rating, Mentor, Timeslot
+from models import db, Mentee, Rating, Mentor, Timeslot, TimeSlot
 
 
 
@@ -31,6 +31,27 @@ app = create_app()
 @app.route("/")
 def hello_world():
     return redirect(url_for('qr_codes'))
+
+@app.route('/setup', methods=['GET', 'POST'])
+def setup():
+    if request.method == 'POST':
+        start_times = request.form.getlist('start_times[]')
+        end_times = request.form.getlist('end_times[]')
+        num_mentors = request.form['num_mentors']
+        num_participants = request.form['num_participants']
+
+        # Store time slots
+        for start_time, end_time in zip(start_times, end_times):
+            time_slot = TimeSlot(start_time=start_time, end_time=end_time)
+            db.session.add(time_slot)
+
+        # Store mentor and participant counts, assuming models or another storage method exists
+        
+        db.session.commit()
+        
+        return redirect(url_for('qr_codes'))  # Adjust to your qr_codes page route name
+
+    return render_template('setup.html')
 
 @app.route('/admin', methods=['GET', 'POST'])
 def admin():

@@ -24,3 +24,8 @@ class Rating(db.Model):
     mentee_id = db.Column(db.Integer, db.ForeignKey('mentee.id'), nullable=False)
     mentor_id = db.Column(db.Integer, db.ForeignKey('mentor.id'), nullable=False)
     rating = db.Column(db.Integer, nullable=False)
+
+class TimeSlot(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    start_time = db.Column(db.String(5))
+    end_time = db.Column(db.String(5))

@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Setup</title>
+    <!-- Include any necessary CSS/JS here -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css" rel="stylesheet">
+
+    <!-- Favicon code -->
+    <link rel="apple-touch-icon" sizes="180x180" href="{{ url_for('static', filename='apple-touch-icon.png') }}">
+    <link rel="icon" type="image/png" sizes="32x32" href="{{ url_for('static', filename='favicon-32x32.png') }}">
+    <link rel="icon" type="image/png" sizes="16x16" href="{{ url_for('static', filename='favicon-16x16.png') }}">
+    <link rel="manifest" href="{{ url_for('static', filename='site.webmanifest') }}">
+</head>
+
+<body>
+    <form method="post">
+        <div id="time-slots">
+            <label>Which time slots are there?</label>
+            <button type="button" onclick="addTimeSlot()">+</button>
+        </div>
+
+        <label>How many mentors are there?</label>
+        <input type="number" name="num_mentors" min="0">
+
+        <label>How many participants are there?</label>
+        <input type="number" name="num_participants" min="0">
+
+        <button type="submit">Submit</button>
+    </form>
+
+    <script>
+        function addTimeSlot() {
+            const container = document.getElementById('time-slots');
+            const inputHTML = `
+        <div class="timeslot row">
+            <div class="input-field col s6">
+                <input type="time" name="start_times[]" class="browser-default">
+            </div>
+            <div class="input-field col s6">
+                <input type="time" name="end_times[]" class="browser-default">
+            </div>
+        </div>
+    `;
+            container.insertAdjacentHTML('beforeend', inputHTML);
+        }
+    </script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            M.FormSelect.init(document.querySelectorAll('select'));
+        });
+    </script>
+</body>
+
+</html>
