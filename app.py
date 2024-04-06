@@ -1,4 +1,4 @@
-from flask import Flask, render_template, redirect, url_for, flash
+from flask import Flask, render_template, redirect, url_for, flash, request
 from forms import MentorForm, MenteeForm, MentorRatingForm
 from flask_sqlalchemy import SQLAlchemy
 import qrcode
@@ -34,6 +34,7 @@ def hello_world():
 
 @app.route('/admin', methods=['GET', 'POST'])
 def admin():
+    mentees_with_rankings = []
     form = MentorForm()
     if form.validate_on_submit():
         mentor = Mentor(name=form.name.data, job_description=form.job_description.data)
@@ -119,6 +120,7 @@ def mentor_form():
     mentors = Mentor.query.all()
     
     if not form.is_submitted():
+        print("Not submitted")
         for mentor in mentors:
             mentor_form = MentorRatingForm()
             form.mentor_ratings.append_entry(mentor_form)
@@ -152,34 +154,40 @@ def mentor_form():
 def mentee_form():
     form = MenteeForm()
     mentors = Mentor.query.all()
-    
-    if not form.is_submitted():
+
+    if request.method == 'GET':
         for mentor in mentors:
-            mentor_form = MentorRatingForm()
-            form.mentor_ratings.append_entry(mentor_form)
+            form.mentor_ratings.append_entry(MentorRatingForm())
 
-        mentor_names = [mentor.name for mentor in mentors]
-        mentors_and_forms = zip(mentor_names, form.mentor_ratings)
-
-        return render_template('mentee_form.html', form=form, mentors_and_forms=mentors_and_forms)
+    if form.is_submitted():
+        print("Form is submitted")
+    
+    if form.validate_on_submit():
+        print("Form is valid")
+        mentee = Mentee(name=form.name.data)
+        db.session.add(mentee)
+        db.session.commit()  # Commit to get the mentee ID
+        
+        for mentor_form, mentor in zip(form.mentor_ratings.entries, mentors):
+            rating_value = mentor_form.form.rating.data
+            if rating_value:  # Assuming '0' means no rating given
+                rating = Rating(mentee_id=mentee.id, mentor_id=mentor.id, rating=rating_value)
+                db.session.add(rating)
+        
+        db.session.commit()
+        flash('Preferences submitted successfully!', 'success')
+        return redirect(url_for('confirmation_page'))
     else:
-        # Form submission logic remains the same
-        if form.validate_on_submit():
-            mentee = Mentee(name=form.name.data)
-            db.session.add(mentee)
-            db.session.commit()  # Commit to get the mentee ID
+        print("Form is not valid")
+        if request.method == 'POST':
+            # Form was submitted but didn't validate
+            print("test")
+            flash('There was a problem with your submission. Please check your input.', 'error')
 
-            for mentor_form, mentor in zip(form.mentor_ratings.entries, mentors):
-                rating_value = mentor_form.form.rating.data
-                if rating_value:  # Assuming '0' means no rating given
-                    rating = Rating(mentee_id=mentee.id, mentor_id=mentor.id, rating=rating_value)
-                    db.session.add(rating)
+    mentor_names = [mentor.name for mentor in mentors]
+    mentors_and_forms = zip(mentor_names, form.mentor_ratings)
+    return render_template('mentee_form.html', form=form, mentors_and_forms=mentors_and_forms)
 
-            db.session.commit()
-            flash('Preferences submitted successfully!', 'success')
-            return redirect(url_for('confirmation_page'))
-
-    return redirect(url_for('confirmation_page'))
 
 if __name__ == "__main__":
-    app.run(host='0.0.0.0', port=5000)
+    app.run(host='0.0.0.0', port=5000) 
