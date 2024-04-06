@@ -116,38 +116,23 @@ def confirmation_page():
 
 @app.route('/mentor_form', methods=['GET', 'POST'])
 def mentor_form():
-    form = MenteeForm()
-    mentors = Mentor.query.all()
+    form = MentorForm()
+    if form.validate_on_submit():
+        mentor = Mentor(name=form.name.data, job_description=form.job_description.data)
+        db.session.add(mentor)
+        db.session.flush()  # This ensures the mentor has an ID without committing the transaction
+
+        # Process each timeslot and create a new Timeslot object
+        timeslots = [timeslot.strip() for timeslot in form.timeslots.data.split(',')]
+        for timeslot_str in timeslots:
+            timeslot = Timeslot(mentor_id=mentor.id, timeslot=timeslot_str, available=True)
+            db.session.add(timeslot)
+        
+        db.session.commit()
+        flash('Mentor and timeslots registered successfully!', 'success')
+        return redirect(url_for('confirmation_page'))
     
-    if not form.is_submitted():
-        print("Not submitted")
-        for mentor in mentors:
-            mentor_form = MentorRatingForm()
-            form.mentor_ratings.append_entry(mentor_form)
-
-        mentor_names = [mentor.name for mentor in mentors]
-        mentors_and_forms = zip(mentor_names, form.mentor_ratings)
-
-        return render_template('mentor_form.html', form=form, mentors_and_forms=mentors_and_forms)
-    else:
-        # Form submission logic remains the same
-        if form.validate_on_submit():
-            mentee = Mentee(name=form.name.data)
-            db.session.add(mentee)
-            db.session.commit()  # Commit to get the mentee ID
-
-            for mentor_form, mentor in zip(form.mentor_ratings.entries, mentors):
-                rating_value = mentor_form.form.rating.data
-                if rating_value:  # Assuming '0' means no rating given
-                    rating = Rating(mentee_id=mentee.id, mentor_id=mentor.id, rating=rating_value)
-                    db.session.add(rating)
-
-            db.session.commit()
-            flash('Preferences submitted successfully!', 'success')
-            return redirect(url_for('confirmation_page'))
-
-    # If form not submitted, re-fetch mentors for consistency
-    return redirect(url_for('confirmation_page'))
+    return render_template('mentor_form.html', form=form)
 
 
 @app.route('/mentee_form', methods=['GET', 'POST'])
