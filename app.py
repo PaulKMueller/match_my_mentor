@@ -8,6 +8,7 @@ from wtforms import StringField, IntegerField, TextAreaField, SubmitField, Selec
 from wtforms.validators import DataRequired, NumberRange, Optional
 import base64
 from models import db, Mentee, Rating, Mentor, TimeSlot, SetupInfo
+from data_adapter import prepare_data_for_optimizer
 
 
 
@@ -21,12 +22,11 @@ def create_app():
 
     with app.app_context():
         db.create_all()
+        print(prepare_data_for_optimizer())
 
     return app
 
 app = create_app()
-
-
 
 @app.route("/")
 def hello_world():
