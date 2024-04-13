@@ -44,14 +44,17 @@ def setup():
         num_mentors = request.form['num_mentors']
         num_participants = request.form['num_participants']
 
-        # Store time slots
-        for timeslot_id, start_time, end_time in zip(timeslot_ids, start_times, end_times):
-            if timeslot_id:  # If there's an ID, we update the existing timeslot
-                timeslot = TimeSlot.query.get(timeslot_id)
-                if timeslot:
-                    timeslot.start_time = start_time
-                    timeslot.end_time = end_time
-            else:  # If there's no ID, we create a new timeslot
+        print(start_times)
+
+         # Loop over the timeslots and handle them accordingly
+        for i, (start_time, end_time) in enumerate(zip(start_times, end_times)):
+            # If the timeslot ID is present, update the existing timeslot
+            if i < len(timeslot_ids) and timeslot_ids[i]:
+                timeslot = TimeSlot.query.get(timeslot_ids[i])
+                timeslot.start_time = start_time
+                timeslot.end_time = end_time
+            else:
+                # If there's no ID, then it's a new timeslot
                 new_timeslot = TimeSlot(start_time=start_time, end_time=end_time)
                 db.session.add(new_timeslot)
 
