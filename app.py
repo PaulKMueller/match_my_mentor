@@ -7,7 +7,7 @@ from io import BytesIO
 from wtforms import StringField, IntegerField, TextAreaField, SubmitField, SelectField
 from wtforms.validators import DataRequired, NumberRange, Optional
 import base64
-from models import db, Mentee, Rating, Mentor, Timeslot, TimeSlot, SetupInfo
+from models import db, Mentee, Rating, Mentor, TimeSlot, SetupInfo
 
 
 
@@ -122,17 +122,18 @@ def update_mentee():
 
 @app.route('/admin', methods=['GET', 'POST'])
 def admin():
-    mentees_with_rankings = []
     form = MentorForm()
     if form.validate_on_submit():
         mentor = Mentor(name=form.name.data, job_description=form.job_description.data)
         db.session.add(mentor)
-        db.session.flush()  # This ensures the mentor has an ID without committing the transaction
+        db.session.commit()  # Commit mentor to obtain an ID for them
 
         # Process each timeslot and create a new Timeslot object
         timeslots = [timeslot.strip() for timeslot in form.timeslots.data.split(',')]
         for timeslot_str in timeslots:
-            timeslot = Timeslot(mentor_id=mentor.id, timeslot=timeslot_str, available=True)
+            start_time, end_time = timeslot_str.split('-')
+            timeslot = TimeSlot(start_time=start_time, end_time=end_time)
+            timeslot.mentors.append(mentor)
             db.session.add(timeslot)
         
         db.session.commit()
@@ -145,10 +146,10 @@ def admin():
     # Prepare data for the template
     mentors_data = []
     for mentor in mentors_with_timeslots:
-        timeslots = ', '.join([str(timeslot.timeslot) for timeslot in mentor.timeslots])
+        timeslots = ', '.join([f"{ts.start_time}-{ts.end_time}" for ts in mentor.timeslots])
         mentors_data.append({'mentor': mentor, 'timeslots': timeslots})
     
-        mentees_with_rankings = Mentee.query.all()
+    mentees_with_rankings = Mentee.query.all()
 
     # Prepare data for the template
     mentees_data = []
@@ -212,20 +213,22 @@ def confirmation_page():
 def mentor_form():
     form = MentorForm()
     if form.validate_on_submit():
-        mentor = Mentor(name=form.name.data, job_description=form.job_description.data)
-        db.session.add(mentor)
-        db.session.flush()  # This ensures the mentor has an ID without committing the transaction
+        mentor = Mentor(
+            name=form.name.data,
+            job_description=form.job_description.data
+        )
+        # This assumes timeslot IDs are passed from checkboxes in the form
+        selected_timeslots = form.timeslots.data  # List of timeslot IDs
+        for timeslot_id in selected_timeslots:
+            timeslot = TimeSlot.query.get(timeslot_id)
+            if timeslot:
+                mentor.timeslots.append(timeslot)
 
-        # Process each timeslot and create a new Timeslot object
-        timeslots = [timeslot.strip() for timeslot in form.timeslots.data.split(',')]
-        for timeslot_str in timeslots:
-            timeslot = Timeslot(mentor_id=mentor.id, timeslot=timeslot_str, available=True)
-            db.session.add(timeslot)
-        
+        db.session.add(mentor)
         db.session.commit()
         flash('Mentor and timeslots registered successfully!', 'success')
-        return redirect(url_for('confirmation_page'))
-    
+        return redirect(url_for('confirmation_page'))  # Make sure to redirect to a confirmation or another appropriate page
+
     return render_template('mentor_form.html', form=form)
 
 
