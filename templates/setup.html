@@ -20,6 +20,26 @@
     <form method="post">
         <div id="time-slots">
             <h3>Which time slots are there?</h3>
+            <!-- Prefill existing timeslots -->
+            {% if timeslots %}
+                {% for slot in timeslots %}
+                <div class="timeslot row">
+                    <!-- Include a hidden input for the timeslot ID -->
+                    <input type="hidden" name="timeslot_ids[]" value="{{ slot.id }}">
+                    
+                    <div class="input-field col s2">
+                        <label>Timeslot ID: {{ slot.id }}</label>
+                    </div>
+                    <div class="input-field col s5">
+                        <input type="time" name="start_times[]" class="browser-default" value="{{ slot.start_time }}">
+                    </div>
+                    <div class="input-field col s5">
+                        <input type="time" name="end_times[]" class="browser-default" value="{{ slot.end_time }}">
+                    </div>
+                </div>
+                {% endfor %}
+            {% endif %}
+            <!-- Button to add a new timeslot -->
             <button type="button" onclick="addTimeSlot()">Add Timeslot</button>
         </div>
 
@@ -35,16 +55,20 @@
     <script>
         function addTimeSlot() {
             const container = document.getElementById('time-slots');
-            const inputHTML = `
+        // Add a timeslot without an ID since it's a new one
+        const inputHTML = `
         <div class="timeslot row">
-            <div class="input-field col s6">
+            <div class="input-field col s2">
+                <label>New Timeslot</label>
+            </div>
+            <div class="input-field col s5">
                 <input type="time" name="start_times[]" class="browser-default">
             </div>
-            <div class="input-field col s6">
+            <div class="input-field col s5">
                 <input type="time" name="end_times[]" class="browser-default">
             </div>
         </div>
-    `;
+        `;
             container.insertAdjacentHTML('beforeend', inputHTML);
         }
     </script>

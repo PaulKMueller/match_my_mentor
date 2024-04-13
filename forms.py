@@ -16,7 +16,7 @@ class MentorForm(FlaskForm):
 class MentorRatingForm(FlaskForm):
     rating = SelectField(
         'Rating',
-        choices=[('0', 'Select a ranking')] + [(str(i), str(i)) for i in range(1, 7)],
+        choices=[('0', 'Ranking')] + [(str(i), str(i)) for i in range(1, 7)],
         validators=[Optional()],
         coerce=int
     )

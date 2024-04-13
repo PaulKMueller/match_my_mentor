@@ -30,22 +30,30 @@ app = create_app()
 
 @app.route("/")
 def hello_world():
-    return redirect(url_for('qr_codes'))
+    return redirect(url_for('setup'))
 
 @app.route('/setup', methods=['GET', 'POST'])
 def setup():
     setup_info = SetupInfo.query.first()  # Fetch the first setup info record, if it exists
+    timeslots = TimeSlot.query.all()  # Query all timeslots
 
     if request.method == 'POST':
+        timeslot_ids = request.form.getlist('timeslot_ids[]')
         start_times = request.form.getlist('start_times[]')
         end_times = request.form.getlist('end_times[]')
         num_mentors = request.form['num_mentors']
         num_participants = request.form['num_participants']
 
         # Store time slots
-        for start_time, end_time in zip(start_times, end_times):
-            time_slot = TimeSlot(start_time=start_time, end_time=end_time)
-            db.session.add(time_slot)
+        for timeslot_id, start_time, end_time in zip(timeslot_ids, start_times, end_times):
+            if timeslot_id:  # If there's an ID, we update the existing timeslot
+                timeslot = TimeSlot.query.get(timeslot_id)
+                if timeslot:
+                    timeslot.start_time = start_time
+                    timeslot.end_time = end_time
+            else:  # If there's no ID, we create a new timeslot
+                new_timeslot = TimeSlot(start_time=start_time, end_time=end_time)
+                db.session.add(new_timeslot)
 
         if setup_info:
             # Update existing SetupInfo
@@ -58,13 +66,16 @@ def setup():
             db.session.add(setup_info)
 
         db.session.commit()
-        return redirect(url_for('qr_codes'))
+        return redirect(url_for('qr_code_mentor'))
 
     # Pass existing data to the template if it exists
-    if setup_info:
-        return render_template('setup.html', setup_info=setup_info)
-    else:
-        return render_template('setup.html')
+    if request.method == 'GET':
+        if setup_info and timeslots:
+            return render_template('setup.html', setup_info=setup_info, timeslots=timeslots)
+        elif setup_info:
+            return render_template('setup.html', setup_info=setup_info)
+        else:
+            return render_template('setup.html')
     
 @app.route('/update-mentor', methods=['POST'])
 def update_mentor():
@@ -132,26 +143,9 @@ def admin():
 
     return render_template('admin.html', form=form, mentors_data=mentors_data, mentees_data=mentees_data)
 
-@app.route('/qr_codes')
-def qr_codes():
-    # Replace the URL below with the actual route to your mentee form
-    mentee_form_url = url_for('mentee_form', _external=True)
+@app.route('/qr_code_mentor')
+def qr_code_mentor():
     mentor_form_url = url_for('mentor_form', _external=True)
-
-    # Create QR for mentee
-    qr_mentee = qrcode.QRCode(
-        version=1,
-        error_correction=qrcode.constants.ERROR_CORRECT_L,
-        box_size=10,
-        border=4,
-    )
-    qr_mentee.add_data(mentee_form_url)
-    qr_mentee.make(fit=True)
-    img_mentee = qr_mentee.make_image(fill_color="black", back_color="white")
-    img_io_mentee = BytesIO()
-    img_mentee.save(img_io_mentee, 'JPEG')
-    img_io_mentee.seek(0)
-    qr_mentee_data = base64.b64encode(img_io_mentee.getvalue()).decode()
 
     # Create QR for mentor
     qr_mentor = qrcode.QRCode(
@@ -169,7 +163,30 @@ def qr_codes():
     qr_mentor_data = base64.b64encode(img_io_mentor.getvalue()).decode()
 
     # Pass the QR data to the template
-    return render_template('qr_codes.html', qr_mentee=qr_mentee_data, qr_mentor=qr_mentor_data)
+    return render_template('qr_codes.html', form_name="Mentor Form", qr_code=qr_mentor_data)
+
+@app.route('/qr_code_mentee')
+def qr_code_mentee():
+    # Replace the URL below with the actual route to your mentee form
+    mentee_form_url = url_for('mentee_form', _external=True)
+
+    # Create QR for mentee
+    qr_mentee = qrcode.QRCode(
+        version=1,
+        error_correction=qrcode.constants.ERROR_CORRECT_L,
+        box_size=10,
+        border=4,
+    )
+    qr_mentee.add_data(mentee_form_url)
+    qr_mentee.make(fit=True)
+    img_mentee = qr_mentee.make_image(fill_color="black", back_color="white")
+    img_io_mentee = BytesIO()
+    img_mentee.save(img_io_mentee, 'JPEG')
+    img_io_mentee.seek(0)
+    qr_mentee_data = base64.b64encode(img_io_mentee.getvalue()).decode()
+
+    # Pass the QR data to the template
+    return render_template('qr_codes.html', form_name="Mentee Form", qr_code=qr_mentee_data)
 
 
 @app.route('/confirmation_page')
