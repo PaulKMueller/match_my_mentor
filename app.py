@@ -76,6 +76,18 @@ def setup():
             return render_template('setup.html', setup_info=setup_info)
         else:
             return render_template('setup.html')
+        
+@app.route('/delete-timeslot', methods=['POST'])
+def delete_timeslot():
+    data = request.json
+    timeslot_id = data['id']
+    timeslot = TimeSlot.query.get(timeslot_id)
+    if timeslot:
+        db.session.delete(timeslot)
+        db.session.commit()
+        return jsonify({'success': True, 'message': 'Timeslot deleted successfully'})
+    else:
+        return jsonify({'success': False, 'message': 'Timeslot not found'}), 404
     
 @app.route('/update-mentor', methods=['POST'])
 def update_mentor():

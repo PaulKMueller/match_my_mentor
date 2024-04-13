@@ -23,7 +23,7 @@
             <!-- Prefill existing timeslots -->
             {% if timeslots %}
                 {% for slot in timeslots %}
-                <div class="timeslot row">
+                <div class="timeslot row" id="timeslot-{{ slot.id }}">
                     <!-- Include a hidden input for the timeslot ID -->
                     <input type="hidden" name="timeslot_ids[]" value="{{ slot.id }}">
                     
@@ -35,6 +35,11 @@
                     </div>
                     <div class="input-field col s5">
                         <input type="time" name="end_times[]" class="browser-default" value="{{ slot.end_time }}">
+                    </div>
+                    <div class="input-field col s1">
+                        <button type="button" onclick="deleteTimeslot({{ slot.id }})" class="delete-btn">
+                            🗑️ <!-- You can replace this with an icon from a library like Font Awesome -->
+                        </button>
                     </div>
                 </div>
                 {% endfor %}
@@ -71,6 +76,32 @@
         `;
             container.insertAdjacentHTML('beforeend', inputHTML);
         }
+        function deleteTimeslot(timeslotId) {
+            if (!confirm('Are you sure you want to delete this timeslot?')) {
+                return; // Do nothing if the user cancels the confirmation dialog
+            }
+
+            fetch('/delete-timeslot', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ id: timeslotId }),
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    const timeslotElement = document.getElementById('timeslot-' + timeslotId);
+                    timeslotElement.remove(); // Remove the timeslot from the DOM
+                } else {
+                    alert('There was an error deleting the timeslot.');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+            });
+        }
+
     </script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
     <script>
