@@ -17,6 +17,7 @@ def create_app():
     app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///mentoring.db'
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
     app.config['SECRET_KEY'] = "my_secret_key"
+    app.config['WTF_CSRF_ENABLED'] = False
 
     db.init_app(app)
 
@@ -240,12 +241,8 @@ def mentee_form():
     if request.method == 'GET':
         for mentor in mentors:
             form.mentor_ratings.append_entry(MentorRatingForm())
-
-    if form.is_submitted():
-        print("Form is submitted")
     
     if form.validate_on_submit():
-        print("Form is valid")
         mentee = Mentee(name=form.name.data)
         db.session.add(mentee)
         db.session.commit()  # Commit to get the mentee ID
@@ -261,6 +258,7 @@ def mentee_form():
         return redirect(url_for('confirmation_page'))
     else:
         print("Form is not valid")
+        print(form.errors)
         if request.method == 'POST':
             # Form was submitted but didn't validate
             print("test")

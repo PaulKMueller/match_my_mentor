@@ -6,6 +6,14 @@
 
 import pulp
 
+# {
+#         "mentors": mentors,
+#         "mentees": mentees,
+#         "timeslots": timeslots,
+#         "availability": mentor_availability,
+#         "preferences": mentee_preferences
+#     }
+
 # Example data structures
 mentors = ['M1', 'M2', 'M3', 'NoMentor']  # 'NoMentor' is a dummy mentor for no assignment
 mentees = ['m1', 'm2', 'm3']
