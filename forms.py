@@ -1,13 +1,19 @@
 from flask_wtf import FlaskForm, Form
-from wtforms import StringField, IntegerField, TextAreaField, SubmitField, SelectField, FormField, FieldList
+from wtforms import StringField, IntegerField, TextAreaField, SubmitField, SelectField, FormField, FieldList, SelectMultipleField
 from wtforms.validators import DataRequired, NumberRange, Optional, ValidationError
-from models import Mentee, Mentor
+from models import Mentee, Mentor, TimeSlot
 
 class MentorForm(FlaskForm):
-    name = StringField('Name', validators=[DataRequired()])
+    name = StringField('Mentor Name', validators=[DataRequired()])
     job_description = TextAreaField('Job Description', validators=[DataRequired()])
-    timeslots = StringField('Timeslots (comma-separated, e.g., 9am-10am, 10am-11am)', validators=[DataRequired()])
-    submit = SubmitField('Register Mentor')
+    # Assume Timeslot is a model that contains all timeslots
+    timeslots = SelectMultipleField('Available Timeslots', choices=[], coerce=int)
+    submit = SubmitField('Register')
+
+    def __init__(self, *args, **kwargs):
+        super(MentorForm, self).__init__(*args, **kwargs)
+        self.timeslots.choices = [(timeslot.id, f"{timeslot.start_time} to {timeslot.end_time}") for timeslot in TimeSlot.query.order_by(TimeSlot.start_time).all()]
+
 
     def validate_name(self, field):
         if Mentor.query.filter_by(name=field.data).first():

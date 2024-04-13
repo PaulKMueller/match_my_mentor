@@ -1,41 +1,45 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Admin Interface</title>
-
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css" rel="stylesheet">
-
     <!-- Favicon code -->
     <link rel="apple-touch-icon" sizes="180x180" href="{{ url_for('static', filename='apple-touch-icon.png') }}">
     <link rel="icon" type="image/png" sizes="32x32" href="{{ url_for('static', filename='favicon-32x32.png') }}">
     <link rel="icon" type="image/png" sizes="16x16" href="{{ url_for('static', filename='favicon-16x16.png') }}">
     <link rel="manifest" href="{{ url_for('static', filename='site.webmanifest') }}">
 </head>
-
 <body>
     <h2>Register Mentor</h2>
-    <form action="" method="post" , class="input-field">
+    <form action="" method="post" class="input-field">
         {{ form.hidden_tag() }}
         <p>
-            {{ form.name.label }}<br /><br />
+            {{ form.name.label }}<br>
             {{ form.name(size=32) }}
         </p>
         <p>
-            {{ form.job_description.label }}<br /><br />
+            {{ form.job_description.label }}<br>
             {{ form.job_description(rows=4) }}
         </p>
         <p>
             {{ form.timeslots.label }}
         </p>
-        <p>
-            {{ form.timeslots(size=5) }}
-        </p>
+        <div class="checkbox-group">
+            {% for subfield in form.timeslots %}
+                <p>
+                    <label>
+                        <input type="checkbox" name="{{ subfield.name }}" value="{{ subfield.data }}" id="timeslot-{{ subfield.id }}" />
+                        <span>{{ subfield.label.text }}</span>
+                    </label>
+                </p>
+            {% endfor %}
+        </div>
         <p>{{ form.submit() }}</p>
     </form>
+    
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
     <script>
@@ -44,5 +48,4 @@
         });
     </script>
 </body>
-
 </html>
