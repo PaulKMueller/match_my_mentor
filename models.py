@@ -29,3 +29,8 @@ class TimeSlot(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     start_time = db.Column(db.String(5))
     end_time = db.Column(db.String(5))
+
+class SetupInfo(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    num_mentors = db.Column(db.Integer, nullable=False)
+    num_participants = db.Column(db.Integer, nullable=False)

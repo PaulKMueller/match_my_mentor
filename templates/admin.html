@@ -45,10 +45,16 @@
                 <th>Available Timeslots</th>
             </tr>
             {% for mentor in mentors_data %}
-            <tr>
+            <!-- <tr>
                 <td>{{ mentor.mentor.name }}</td>
                 <td>{{ mentor.mentor.job_description }}</td>
                 <td>{{ mentor.timeslots }}</td>
+            </tr> -->
+            <tr data-id="{{ mentor.mentor.id }}">
+                <td contenteditable="true" class="editable" data-column="name">{{ mentor.mentor.name }}</td>
+                <td contenteditable="true" class="editable" data-column="job_description">{{ mentor.mentor.job_description }}</td>
+                <td contenteditable="true" class="editable" data-column="timeslots">{{ mentor.timeslots }}</td>
+                <td><button onclick="saveChanges(this)">Save</button></td>
             </tr>
             {% endfor %}
         </table>
@@ -81,7 +87,36 @@
             var elems = document.querySelectorAll('select');
             var instances = M.FormSelect.init(elems);
         });
-        </script>
+    </script>
+    <script>
+        function saveChanges(button) {
+            var row = button.closest('tr');
+            var mentorId = row.getAttribute('data-id');
+            var updatedData = {
+                id: mentorId,
+                name: row.querySelector('[data-column="name"]').innerText,
+                job_description: row.querySelector('[data-column="job_description"]').innerText,
+                timeslots: row.querySelector('[data-column="timeslots"]').innerText,
+            };
+
+            fetch('/update-mentor', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(updatedData)
+            }).then(response => response.json()).then(data => {
+                if (data.message) {
+                    // Display some success message or visual feedback
+                    alert(data.message);
+                }
+            }).catch(error => {
+                // Handle errors, e.g., show an alert or update the UI to reflect the error
+                console.error('Error:', error);
+            });
+        }
+</script>
+            
 </body>
 
 </html>

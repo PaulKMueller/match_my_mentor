@@ -1,4 +1,4 @@
-from flask import Flask, render_template, redirect, url_for, flash, request
+from flask import Flask, render_template, redirect, url_for, flash, request, jsonify
 from forms import MentorForm, MenteeForm, MentorRatingForm
 from flask_sqlalchemy import SQLAlchemy
 import qrcode
@@ -7,7 +7,7 @@ from io import BytesIO
 from wtforms import StringField, IntegerField, TextAreaField, SubmitField, SelectField
 from wtforms.validators import DataRequired, NumberRange, Optional
 import base64
-from models import db, Mentee, Rating, Mentor, Timeslot, TimeSlot
+from models import db, Mentee, Rating, Mentor, Timeslot, TimeSlot, SetupInfo
 
 
 
@@ -34,6 +34,8 @@ def hello_world():
 
 @app.route('/setup', methods=['GET', 'POST'])
 def setup():
+    setup_info = SetupInfo.query.first()  # Fetch the first setup info record, if it exists
+
     if request.method == 'POST':
         start_times = request.form.getlist('start_times[]')
         end_times = request.form.getlist('end_times[]')
@@ -45,13 +47,52 @@ def setup():
             time_slot = TimeSlot(start_time=start_time, end_time=end_time)
             db.session.add(time_slot)
 
-        # Store mentor and participant counts, assuming models or another storage method exists
-        
-        db.session.commit()
-        
-        return redirect(url_for('qr_codes'))  # Adjust to your qr_codes page route name
+        if setup_info:
+            # Update existing SetupInfo
+            print("test")
+            setup_info.num_mentors = int(num_mentors)
+            setup_info.num_participants = int(num_participants)
+        else:
+            # Create new SetupInfo instance if none exists
+            setup_info = SetupInfo(num_mentors=int(num_mentors), num_participants=int(num_participants))
+            db.session.add(setup_info)
 
-    return render_template('setup.html')
+        db.session.commit()
+        return redirect(url_for('qr_codes'))
+
+    # Pass existing data to the template if it exists
+    if setup_info:
+        return render_template('setup.html', setup_info=setup_info)
+    else:
+        return render_template('setup.html')
+    
+@app.route('/update-mentor', methods=['POST'])
+def update_mentor():
+    data = request.json
+    mentor_id = data['id']
+    mentor = Mentor.query.get(mentor_id)
+    if mentor:
+        mentor.name = data.get('name', mentor.name)
+        mentor.job_description = data.get('job_description', mentor.job_description)
+        # You would also handle the timeslots here, possibly requiring additional logic
+
+        db.session.commit()
+        return jsonify({'message': 'Mentor updated successfully'}), 200
+    return jsonify({'message': 'Mentor not found'}), 404
+
+
+@app.route('/update-mentee', methods=['POST'])
+def update_mentee():
+    mentee_id = request.json['id']
+    new_rating = request.json['rating']
+    mentor_id = request.json['mentor_id']
+    rating = Rating.query.filter_by(mentee_id=mentee_id, mentor_id=mentor_id).first()
+    if rating:
+        rating.rating = new_rating
+        db.session.commit()
+        return jsonify({'message': 'Rating updated successfully'}), 200
+    return jsonify({'message': 'Rating not found'}), 404
+
 
 @app.route('/admin', methods=['GET', 'POST'])
 def admin():

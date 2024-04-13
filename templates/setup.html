@@ -15,17 +15,19 @@
 </head>
 
 <body>
+    <h2>Setting up your mentoring event.</h2>
+    <p>Please input the details of your event below.</p>
     <form method="post">
         <div id="time-slots">
-            <label>Which time slots are there?</label>
-            <button type="button" onclick="addTimeSlot()">+</button>
+            <h3>Which time slots are there?</h3>
+            <button type="button" onclick="addTimeSlot()">Add Timeslot</button>
         </div>
 
-        <label>How many mentors are there?</label>
-        <input type="number" name="num_mentors" min="0">
+        <label for="num_mentors">Number of Mentors:</label>
+        <input type="number" id="num_mentors" name="num_mentors" value="{{ setup_info.num_mentors if setup_info else '' }}" min="0" required>
 
-        <label>How many participants are there?</label>
-        <input type="number" name="num_participants" min="0">
+        <label for="num_participants">Number of Participants:</label>
+        <input type="number" id="num_participants" name="num_participants" value="{{ setup_info.num_participants if setup_info else '' }}" min="0" required>
 
         <button type="submit">Submit</button>
     </form>
