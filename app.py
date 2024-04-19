@@ -9,6 +9,7 @@ from wtforms.validators import DataRequired, NumberRange, Optional
 import base64
 from models import db, Mentee, Rating, Mentor, TimeSlot, SetupInfo
 from data_adapter import prepare_data_for_optimizer
+from optimizer import Optimizer
 
 
 
@@ -23,7 +24,10 @@ def create_app():
 
     with app.app_context():
         db.create_all()
-        print(prepare_data_for_optimizer())
+        data = prepare_data_for_optimizer()
+        # print(data)
+        optimizer = Optimizer(data)
+        optimizer.solve()
 
     return app
 
