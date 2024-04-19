@@ -1,0 +1,49 @@
+# conda environments:
+#
+                         /Users/pkm/.cache/pre-commit/repo38036xpz/conda-default
+                         /Users/pkm/.cache/pre-commit/repo3n7cbygd/conda-default
+                         /Users/pkm/.cache/pre-commit/repo50peqzza/conda-default
+                         /Users/pkm/.cache/pre-commit/repo5_f6zi1h/conda-default
+                         /Users/pkm/.cache/pre-commit/repo75ffxv_h/conda-default
+                         /Users/pkm/.cache/pre-commit/repo8tcninq2/conda-default
+                         /Users/pkm/.cache/pre-commit/repoa_44pxxn/conda-default
+                         /Users/pkm/.cache/pre-commit/repobxlshjnp/conda-default
+                         /Users/pkm/.cache/pre-commit/repod_5ce35v/conda-default
+                         /Users/pkm/.cache/pre-commit/repoehea3wgv/conda-default
+                         /Users/pkm/.cache/pre-commit/repofctdzer5/conda-default
+                         /Users/pkm/.cache/pre-commit/repofpod2659/conda-default
+                         /Users/pkm/.cache/pre-commit/repofwhetjv_/conda-default
+                         /Users/pkm/.cache/pre-commit/repog3bzir5n/conda-default
+                         /Users/pkm/.cache/pre-commit/repoivoth8tk/conda-default
+                         /Users/pkm/.cache/pre-commit/repokhbd6nvs/conda-default
+                         /Users/pkm/.cache/pre-commit/repokkm1vxw3/conda-default
+                         /Users/pkm/.cache/pre-commit/repolkegtzre/conda-default
+                         /Users/pkm/.cache/pre-commit/repolo9brr1_/conda-default
+                         /Users/pkm/.cache/pre-commit/reponjijzvaj/conda-default
+                         /Users/pkm/.cache/pre-commit/repoono98_4t/conda-default
+                         /Users/pkm/.cache/pre-commit/repop3zl4fen/conda-default
+                         /Users/pkm/.cache/pre-commit/reporsau7qc7/conda-default
+                         /Users/pkm/.cache/pre-commit/reportehzy1o/conda-default
+                         /Users/pkm/.cache/pre-commit/repos4f9ujdn/conda-default
+                         /Users/pkm/.cache/pre-commit/repoubbcxn19/conda-default
+                         /Users/pkm/.cache/pre-commit/repoubplswvc/conda-default
+                         /Users/pkm/.cache/pre-commit/repoxj7j11ur/conda-default
+                         /Users/pkm/.cache/pre-commit/repoxmzw5hme/conda-default
+                         /Users/pkm/.cache/pre-commit/repoy1zwyfoq/conda-default
+                         /Users/pkm/.cache/pre-commit/repoycg6gjbe/conda-default
+                         /Users/pkm/.cache/pre-commit/repoyvi52uv3/conda-default
+                         /Users/pkm/.cache/pre-commit/repozgvetohf/conda-default
+                         /Users/pkm/.cache/pre-commit/repozn3jndog/conda-default
+                         /Users/pkm/micromamba/envs/conda-comply
+                         /Users/pkm/micromamba/envs/quantco-blog
+                         /Users/pkm/micromamba/envs/quantcore.ediparse
+                         /Users/pkm/micromamba/envs/quantcore.learn
+                         /Users/pkm/micromamba/envs/test
+base                     /opt/homebrew/Caskroom/miniforge/base
+match_my_mentor       *  /opt/homebrew/Caskroom/miniforge/base/envs/match_my_mentor
+package                  /opt/homebrew/Caskroom/miniforge/base/envs/package
+quantcore-tations        /opt/homebrew/Caskroom/miniforge/base/envs/quantcore-tations
+quantcore.geo            /opt/homebrew/Caskroom/miniforge/base/envs/quantcore.geo
+quantcore.thek           /opt/homebrew/Caskroom/miniforge/base/envs/quantcore.thek
+quantcore.xp             /opt/homebrew/Caskroom/miniforge/base/envs/quantcore.xp
+
