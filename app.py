@@ -272,6 +272,18 @@ def mentee_form():
     mentors_and_forms = zip(mentor_names, form.mentor_ratings)
     return render_template('mentee_form.html', form=form, mentors_and_forms=mentors_and_forms)
 
+@app.route('/matching')
+def index():
+    # Prepare data for the optimizer
+    data = prepare_data_for_optimizer()  # You need to define this based on your needs
+    optimizer = Optimizer(data)
+    optimizer.solve()
+
+    # Fetch results from the optimizer
+    results = optimizer.get_results()  # You would need to add a method to extract formatted results
+
+    return render_template('matching.html', results=results)
+
 
 if __name__ == "__main__":
     app.run(host='0.0.0.0', port=5000) 

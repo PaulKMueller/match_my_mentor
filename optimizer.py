@@ -80,10 +80,10 @@ class Optimizer:
         problem = pulp.LpProblem("Mentor_Mentee_Scheduling", pulp.LpMinimize)
 
         # Decision variables: (mentee, mentor, timeslot)
-        x = pulp.LpVariable.dicts("pairing", (self.mentees, self.mentors, self.timeslots), cat=pulp.LpBinary)
+        self.x = pulp.LpVariable.dicts("pairing", (self.mentees, self.mentors, self.timeslots), cat=pulp.LpBinary)
 
         # Objective function: Minimize the total preference score
-        problem += pulp.lpSum([self.preferences[(mentee, mentor)] * x[mentee][mentor][timeslot]
+        problem += pulp.lpSum([self.preferences[(mentee, mentor)] * self.x[mentee][mentor][timeslot]
                             for mentee in self.mentees for mentor in self.mentors for timeslot in self.timeslots
                             if (mentor, timeslot) in self.availability and self.availability[mentor, timeslot]])
 
@@ -92,22 +92,21 @@ class Optimizer:
         # Constraint: Each mentee is scheduled at most once per timeslot
         for mentee in self.mentees:
             for timeslot in self.timeslots:
-                problem += pulp.lpSum([x[mentee][mentor][timeslot] for mentor in self.mentors
+                problem += pulp.lpSum([self.x[mentee][mentor][timeslot] for mentor in self.mentors
                                     if (mentor, timeslot) in self.availability and self.availability[mentor, timeslot]]) == 1
 
         # Constraint: Each mentor-mentee pair should meet only once
         for mentee in self.mentees:
             for mentor in self.mentors:
-                problem += pulp.lpSum([x[mentee][mentor][timeslot] for timeslot in self.timeslots]) <= 1
+                problem += pulp.lpSum([self.x[mentee][mentor][timeslot] for timeslot in self.timeslots]) <= 1
 
         # Constraint: Each mentor can appear only once in each timeslot
         for mentor in self.mentors:
             for timeslot in self.timeslots:
-                problem += (pulp.lpSum([x[mentee][mentor][timeslot] for mentee in self.mentees]) <= 1) * -1000
+                problem += (pulp.lpSum([self.x[mentee][mentor][timeslot] for mentee in self.mentees]) <= 1) * -1000
 
         # Solve the problem
         status = problem.solve()
-
 
         # Output formatting
         print("Schedule by Timeslot:")
@@ -115,12 +114,11 @@ class Optimizer:
             print(f"\nTimeslot {timeslot}:")
             for mentee in self.mentees:
                 for mentor in self.mentors:
-                    if pulp.value(x[mentee][mentor][timeslot]) == 1:
+                    if pulp.value(self.x[mentee][mentor][timeslot]) == 1:
                         if mentor != 'NoMentor':
                             print(f"  Mentee {mentee} is assigned to Mentor {mentor}")
                         else:
                             print(f"  Mentee {mentee} is not assigned to any mentor in this timeslot")
-
 
         if status == pulp.LpStatusOptimal:
             print("An optimal solution has been found.")
@@ -130,3 +128,16 @@ class Optimizer:
             print("The problem is unbounded.")
         else:
             print("Some other status: ", pulp.LpStatus[status])
+    
+    def get_results(self):
+        result_list = []
+        for timeslot in self.timeslots:
+            for mentee in self.mentees:
+                for mentor in self.mentors:
+                    if pulp.value(self.x[mentee][mentor][timeslot]) == 1:
+                        result_list.append({
+                            'timeslot': timeslot,
+                            'mentee': mentee,
+                            'mentor': mentor if mentor != 'NoMentor' else 'None'
+                        })
+        return result_list
