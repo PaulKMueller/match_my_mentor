@@ -1,125 +1,81 @@
-body, html {
-    margin: 50px;
-    padding: 50px;
-    width: 100%;
-    min-height: 100vh;
+/* Base styles to include in your main stylesheet */
+
+html, body {
+    height: 100%; /* Full height of the viewport */
+    margin: 0; /* Remove default margin */
+    padding: 0; /* Remove default padding */
+    display: flex; /* Enables flexbox */
+    justify-content: center; /* Centers horizontally */
+    align-items:center; /* Centers vertically */
+    font-family: Arial, sans-serif; /* Ensures consistent font usage */
+    background-color: #f5f5f5; /* A light grey background color */
+    flex-flow: column; /* Stacks children elements vertically */
+}
+
+.qr-container {
+    display: flex; /* Enables flexbox for this container */
+    flex-direction: column; /* Stacks children elements vertically */
+    align-items: center; /* Centers children horizontally */
+    text-align: center; /* Centers text elements */
+}
+
+.qr-item {
+    margin-bottom: 20px; /* Adds space between the QR code and the button */
+}
+
+button {
+    cursor: pointer; /* Shows a pointer cursor on hover */
+}
+
+.container {
     display: flex;
     flex-direction: column;
     justify-content: center;
     align-items: center;
-    font-family: Arial, sans-serif;
-    background-color: #f5f5f5;
-    box-sizing: border-box; /* Ensures that padding is included in total width and height */
-}
-
-.container {
-    width: 80%;
-    max-width: 720px; /* This is the default max-width, which will be overridden for larger screens in the media query below */
+    width: 100%; /* Full width to contain all elements neatly */
+    max-width: 960px; /* Maximum width to ensure content does not stretch too far on larger screens */
     padding: 20px;
-    margin: auto; /* Center the container on the page */
+    box-sizing: border-box;
 }
 
-.mentee-form, .form-group, .select-rating, .submit-btn, form {
-    width: 100%; /* Ensures these elements use full width */
-}
-
-.mentee-form {
-    font-size: 18px; /* Default font size for readability */
-    background-color: white;
-    padding: 20px;
-    margin: 0 auto; /* Centers the form horizontally */
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    border-radius: 8px;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-}
-
-.form-group {
-    margin-bottom: 20px;
-    text-align: center;
-}
-
-.select-rating, .submit-btn {
+.input-field, .button, .card {
+    width: 100%; /* Ensures these elements use full width for better structure */
+    margin: 10px 0; /* Spacing for visual clarity */
     padding: 10px;
-    border: 1px solid #ddd;
-    margin-top: 5px;
+    box-sizing: border-box; /* Padding included in the width and height */
 }
 
-.submit-btn {
-    background-color: #007bff;
+.button {
+    background-color: #6200EA; /* Example of a Material Design primary color */
     color: white;
+    padding: 12px 24px;
+    border: none;
     border-radius: 4px;
     cursor: pointer;
-}
-
-.qr-container {
-    display: flex;
-    justify-content: space-around;
-    flex-direction: column;
-}
-
-.qr-item {
     text-align: center;
-    margin: 10px 100px;
 }
 
-.table-container {
-    display: flex;
-    justify-content: space-around;
-    flex-wrap: wrap;
-    margin-top: 20px;
+.card {
+    background-color: white;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.25); /* Material Design shadow for depth */
+    border-radius: 8px;
 }
 
-table {
-    border-collapse: collapse;
-}
-
-th, td {
-    border: 1px solid #dddddd;
-    text-align: left;
-    padding: 8px;
-}
-
-th {
-    background-color: #f2f2f2;
-}
-
-/* Label and input field styling */
-.mentor-name-label, .input-field label.active {
-    font-size: 1.5rem; /* Unified font size for labels */
-}
-
-.mentor-name-label, .mentor-rating-select {
-    display: flex;
-    align-items: center;
-    margin-right: 1rem;
-}
-
-.input-field {
-    margin: 0; /* Removes both top and bottom margins for alignment */
-}
-
-/* Responsive font sizes */
+/* Responsive adjustments */
 @media (max-width: 600px) {
-    .mentee-form {
-        font-size: 16px; /* Slightly smaller font for very small devices */
-    }
-}
-
-/* Container width adjustments for larger screens */
-@media (min-width: 992px) {
     .container {
-        max-width: 960px; /* Allows the container to be wider on larger screens */
+        padding: 10px; /* Less padding on smaller screens */
+    }
+    .button, .input-field, .card {
+        padding: 8px; /* Smaller padding for smaller elements */
     }
 }
 
-/* Column adjustments for non-mobile screens */
-@media screen and (min-width: 601px) {
-    .select-label {
-        width: 30%; /* Adjust label width as necessary */
-    }
-    .input-field {
-        width: 70%;
-    }
+/* Ensure all form elements like input, select, textarea are styled consistently */
+.input-field input, .input-field select, .input-field textarea {
+    width: 100%;
+    padding: 10px;
+    margin: 5px 0;
+    box-sizing: border-box;
+    border: 1px solid #CCCCCC; /* Subtle borders for inputs */
 }

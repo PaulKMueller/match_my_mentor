@@ -5,7 +5,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Matching QR Codes</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+
     <link href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css" rel="stylesheet">
+
+    <!-- Favicon code -->
     <link rel="apple-touch-icon" sizes="180x180" href="{{ url_for('static', filename='apple-touch-icon.png') }}">
     <link rel="icon" type="image/png" sizes="32x32" href="{{ url_for('static', filename='favicon-32x32.png') }}">
     <link rel="icon" type="image/png" sizes="16x16" href="{{ url_for('static', filename='favicon-16x16.png') }}">
@@ -14,7 +17,7 @@
 <body>
     <div class="qr-container">
         <div class="qr-item">
-            <h3>{{ form_name }}:</h3>
+            <h2>{{ form_name }}:</h2>
             <img src="data:image/jpeg;base64,{{ qr_code }}" alt="QR Code">
         </div>
         <button type="button" onclick="nextSite()" class="btn waves-effect waves-light">
