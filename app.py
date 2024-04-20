@@ -97,6 +97,34 @@ def delete_timeslot():
         return jsonify({'success': True, 'message': 'Timeslot deleted successfully'})
     else:
         return jsonify({'success': False, 'message': 'Timeslot not found'}), 404
+
+@app.route('/update-mentee-rankings', methods=['POST'])
+def update_mentee_rankings():
+    data = request.get_json()
+    mentee_id = data['mentee_id']
+    rankings = data['rankings']
+
+    try:
+        for ranking in rankings:
+            mentor_id = ranking['mentor_id']
+            new_rating = ranking['rating']
+
+            # Find the existing rating or create a new one if it doesn't exist
+            rating = Rating.query.filter_by(mentee_id=mentee_id, mentor_id=mentor_id).first()
+            if rating:
+                rating.rating = new_rating  # Update the existing rating
+            else:
+                # Create a new rating record if it doesn't exist
+                rating = Rating(mentee_id=mentee_id, mentor_id=mentor_id, rating=new_rating)
+                db.session.add(rating)
+
+        db.session.commit()  # Commit changes
+        return jsonify({'success': True, 'message': 'Rankings updated successfully!'})
+
+    except Exception as e:
+        db.session.rollback()  # Roll back in case of error
+        return jsonify({'success': False, 'message': 'Failed to update rankings: {}'.format(str(e))}), 500
+
     
 @app.route('/update-mentor', methods=['POST'])
 def update_mentor():

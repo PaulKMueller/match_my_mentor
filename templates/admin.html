@@ -16,25 +16,6 @@
 </head>
 
 <body>
-    <h2>Register Mentor</h2>
-    <form action="" method="post", class="input-field">
-        {{ form.hidden_tag() }}
-        <p>
-            {{ form.name.label }}<br>
-            {{ form.name(size=32) }}
-        </p>
-        <p>
-            {{ form.job_description.label }}<br>
-            {{ form.job_description(rows=4) }}
-        </p>
-        <p>
-            {{ form.timeslots.label }}<br>
-            {{ form.timeslots(size=5) }}
-        </p>
-        <p>{{ form.submit() }}</p>
-    </form>
-
-
     <div class="container">
         <div class="table-container"></div>
         <!-- Mentor Table -->
@@ -63,20 +44,25 @@
     <div class="table-container">
         <!-- Mentee Table -->
         <table class="striped">
-            <tr>
-                <th>Mentee Name</th>
-                {% for mentor in mentors_data %}
-                <th>Ranking for {{ mentor.mentor.name }}</th>
+            <thead>
+                <tr>
+                    <th>Mentee Name</th>
+                    {% for mentor in mentors_data %}
+                    <th>Ranking for {{ mentor.mentor.name }}</th>
+                    {% endfor %}
+                </tr>
+            </thead>
+            <tbody>
+                {% for mentee in mentees_data %}
+                <tr data-mentee-id="{{ mentee.mentee.id }}">
+                    <td>{{ mentee.mentee.name }}</td>
+                    {% for mentor in mentors_data %}
+                    <td contenteditable="true" class="editable-ranking" data-mentor-id="{{ mentor.mentor.id }}">{{ mentee.rankings.get(mentor.mentor.id, 'N/A') }}</td>
+                    {% endfor %}
+                    <td><button onclick="saveRankingChanges(this)">Save</button></td>
+                </tr>
                 {% endfor %}
-            </tr>
-            {% for mentee in mentees_data %}
-            <tr>
-                <td>{{ mentee.mentee.name }}</td>
-                {% for mentor in mentors_data %}
-                <td>{{ mentee.rankings.get(mentor.mentor.id, 'N/A') }}</td>
-                {% endfor %}
-            </tr>
-            {% endfor %}
+            </tbody>
         </table>
     </div>
     </div>
@@ -89,6 +75,42 @@
         });
     </script>
     <script>
+
+function saveRankingChanges(button) {
+    var row = button.closest('tr');
+    var menteeId = row.getAttribute('data-mentee-id');
+    var rankings = [];
+
+    row.querySelectorAll('.editable-ranking').forEach(cell => {
+        rankings.push({
+            mentor_id: cell.getAttribute('data-mentor-id'),
+            rating: cell.innerText
+        });
+    });
+
+    var updatedData = {
+        mentee_id: menteeId,
+        rankings: rankings
+    };
+
+    fetch('/update-mentee-rankings', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(updatedData)
+    }).then(response => response.json()).then(data => {
+        if (data.success) {
+            alert('Rankings updated successfully!');
+        } else {
+            alert('Failed to update rankings.');
+        }
+    }).catch(error => {
+        console.error('Error:', error);
+        alert('An error occurred while updating.');
+    });
+}
+
         function saveChanges(button) {
             var row = button.closest('tr');
             var mentorId = row.getAttribute('data-id');
