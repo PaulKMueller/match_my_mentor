@@ -10,6 +10,7 @@ import base64
 from models import db, Mentee, Rating, Mentor, TimeSlot, SetupInfo
 from data_adapter import prepare_data_for_optimizer
 from optimizer import Optimizer
+import logging
 
 
 
@@ -276,6 +277,7 @@ def mentee_form():
 def index():
     # Prepare data for the optimizer
     data = prepare_data_for_optimizer()  # You need to define this based on your needs
+    print(data)
     optimizer = Optimizer(data)
     optimizer.solve()
 

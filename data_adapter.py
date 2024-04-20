@@ -22,6 +22,8 @@ def get_mentee_preferences():
 
 # Main function to prepare data
 def prepare_data_for_optimizer():
+
+    print("Data preparation started")
     mentor_availability = get_mentor_availability()
     mentee_preferences = get_mentee_preferences()
 

@@ -4,6 +4,7 @@
 #     def __init__(self):
 
 from data_adapter import prepare_data_for_optimizer
+from models import Mentee, Mentor
 
 
 import pulp
@@ -55,7 +56,6 @@ import pulp
 # }
 
 class Optimizer:
-
     def __init__(self, data):
         self.high_preference_penalty = 100  # This should be higher than any undesirable score
         self.mentees = data["mentees"]
@@ -72,8 +72,8 @@ class Optimizer:
         for timeslot in self.timeslots:
             self.availability[('NoMentor', timeslot)] = True
 
-        print("Here are the mentors:")
-        print(self.mentors)
+        # print("Here are the mentors:")
+        # print(self.mentors)
 
     def solve(self):
         # Set up the problem
@@ -108,36 +108,45 @@ class Optimizer:
         # Solve the problem
         status = problem.solve()
 
-        # Output formatting
-        print("Schedule by Timeslot:")
-        for timeslot in self.timeslots:
-            print(f"\nTimeslot {timeslot}:")
-            for mentee in self.mentees:
-                for mentor in self.mentors:
-                    if pulp.value(self.x[mentee][mentor][timeslot]) == 1:
-                        if mentor != 'NoMentor':
-                            print(f"  Mentee {mentee} is assigned to Mentor {mentor}")
-                        else:
-                            print(f"  Mentee {mentee} is not assigned to any mentor in this timeslot")
+        # # Output formatting
+        # print("Schedule by Timeslot:")
+        # for timeslot in self.timeslots:
+        #     print(f"\nTimeslot {timeslot}:")
+        #     for mentee in self.mentees:
+        #         for mentor in self.mentors:
+        #             if pulp.value(self.x[mentee][mentor][timeslot]) == 1:
+        #                 if mentor != 'NoMentor':
+        #                     print(f"  Mentee {mentee} is assigned to Mentor {mentor}")
+        #                 else:
+        #                     print(f"  Mentee {mentee} is not assigned to any mentor in this timeslot")
 
-        if status == pulp.LpStatusOptimal:
-            print("An optimal solution has been found.")
-        elif status == pulp.LpStatusInfeasible:
-            print("No feasible solution exists.")
-        elif status == pulp.LpStatusUnbounded:
-            print("The problem is unbounded.")
-        else:
-            print("Some other status: ", pulp.LpStatus[status])
+        # if status == pulp.LpStatusOptimal:
+        #     print("An optimal solution has been found.")
+        # elif status == pulp.LpStatusInfeasible:
+        #     print("No feasible solution exists.")
+        # elif status == pulp.LpStatusUnbounded:
+        #     print("The problem is unbounded.")
+        # else:
+        #     print("Some other status: ", pulp.LpStatus[status])
     
     def get_results(self):
-        result_list = []
+        # Fetch all mentors and mentees first to avoid repeated database queries
+        mentor_names = {mentor.id: mentor.name for mentor in Mentor.query.all()}
+        mentee_names = {mentee.id: mentee.name for mentee in Mentee.query.all()}
+        
+        results_by_timeslot = {}
         for timeslot in self.timeslots:
+            results_by_timeslot[timeslot] = []
             for mentee in self.mentees:
                 for mentor in self.mentors:
                     if pulp.value(self.x[mentee][mentor][timeslot]) == 1:
-                        result_list.append({
-                            'timeslot': timeslot,
-                            'mentee': mentee,
-                            'mentor': mentor if mentor != 'NoMentor' else 'None'
+                        if mentor == 'NoMentor':
+                            mentor_name = "Break"
+                        else:
+                            mentor_name = mentor_names.get(int(mentor), 'None')  # Use 'None' or similar if no mentor
+                        results_by_timeslot[timeslot].append({
+                            'mentee': mentee_names[int(mentee)],
+                            'mentor': mentor_name
                         })
-        return result_list
+        return results_by_timeslot
+

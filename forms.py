@@ -29,7 +29,7 @@ class MentorRatingForm(FlaskForm):
 
 class MenteeForm(FlaskForm):
     name = StringField('Your Name', validators=[DataRequired()])
-    mentor_ratings = FieldList(FormField(MentorRatingForm), min_entries=0)
+    mentor_ratings = FieldList(FormField(MentorRatingForm), min_entries=0, default='6', validators=[DataRequired()])
     submit = SubmitField('Submit Preferences')
 
     def validate_name(self, field):
