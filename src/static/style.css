@@ -1,15 +1,18 @@
 /* Base styles to include in your main stylesheet */
-
 html, body {
     height: 100%; /* Full height of the viewport */
     margin: 0; /* Remove default margin */
     padding: 0; /* Remove default padding */
-    display: flex; /* Enables flexbox */
-    justify-content: center; /* Centers horizontally */
-    align-items:center; /* Centers vertically */
+    display: block; /* Change from flex to block for a natural flow */
     font-family: Arial, sans-serif; /* Ensures consistent font usage */
     background-color: #f5f5f5; /* A light grey background color */
-    flex-flow: column; /* Stacks children elements vertically */
+}
+
+body {
+    min-height: 100vh; /* Ensures at least full viewport height */
+    display: flex; /* Maintains flex for direct child alignment */
+    flex-direction: column; /* Stacks children elements vertically */
+    justify-content: flex-start; /* Align content from the start */
 }
 
 .qr-container {

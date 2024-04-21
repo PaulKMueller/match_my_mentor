@@ -19,13 +19,11 @@
                 <tr>
                     <th>Mentor Name</th>
                     <th>Job Description</th>
-                    <th>Available Timeslots</th>
                 </tr>
                 {% for mentor in mentors_data %}
                 <tr data-id="{{ mentor.mentor.id }}">
                     <td contenteditable="true" class="editable" data-column="name">{{ mentor.mentor.name }}</td>
                     <td contenteditable="true" class="editable" data-column="job_description">{{ mentor.mentor.job_description }}</td>
-                    <td>{{ mentor.timeslots }}</td>
                     <td><button onclick="saveChanges(this)">Save</button></td>
                 </tr>
                 {% endfor %}

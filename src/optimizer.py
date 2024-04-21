@@ -27,7 +27,6 @@ class Optimizer:
         for timeslot in self.timeslots:
             self.availability[('NoMentor', timeslot)] = True
 
-
     def solve(self):
         # Set up the problem
         problem = pulp.LpProblem("Mentor_Mentee_Scheduling", pulp.LpMinimize)
@@ -45,8 +44,8 @@ class Optimizer:
         # Constraint: Each mentee is scheduled at most once per timeslot
         for mentee in self.mentees:
             for timeslot in self.timeslots:
-                problem += pulp.lpSum([self.x[mentee][mentor][timeslot] for mentor in self.mentors
-                                    if (mentor, timeslot) in self.availability and self.availability[mentor, timeslot]]) == 1
+                problem += (pulp.lpSum([self.x[mentee][mentor][timeslot] for mentor in self.mentors
+                                    if (mentor, timeslot) in self.availability and self.availability[mentor, timeslot]]) == 1) * 10000
 
         # Constraint: Each mentor-mentee pair should meet only once
         for mentee in self.mentees:
@@ -56,7 +55,7 @@ class Optimizer:
         # Constraint: Each mentor can appear only once in each timeslot
         for mentor in self.mentors:
             for timeslot in self.timeslots:
-                problem += (pulp.lpSum([self.x[mentee][mentor][timeslot] for mentee in self.mentees]) <= 1)
+                problem += (pulp.lpSum([self.x[mentee][mentor][timeslot] for mentee in self.mentees]) <= 1) * 10000
 
         # Solve the problem
         status = problem.solve()

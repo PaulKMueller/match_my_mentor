@@ -64,10 +64,11 @@ def test_optimization_validity(optimizer):
 def test_get_results_format(optimizer):
     optimizer.solve()
     results = optimizer.get_results()
+    print(results)
     assert isinstance(results, dict)
     for timeslot, assignments in results.items():
         for assignment in assignments:
             assert set(assignment.keys()) == {'mentee', 'mentor'}
-            assert isinstance(assignment['mentee'], str)
-            assert isinstance(assignment['mentor'], str)
+            assert isinstance(assignment['mentee'], int)
+            assert isinstance(assignment['mentor'], int)
 
