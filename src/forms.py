@@ -1,7 +1,7 @@
 from flask_wtf import FlaskForm, Form
 from wtforms import StringField, IntegerField, TextAreaField, SubmitField, SelectField, FormField, FieldList, SelectMultipleField
 from wtforms.validators import DataRequired, NumberRange, Optional, ValidationError
-from models import Mentee, Mentor, TimeSlot
+from .models import Mentee, Mentor, TimeSlot
 
 class MentorForm(FlaskForm):
     name = StringField('Mentor Name', validators=[DataRequired()])

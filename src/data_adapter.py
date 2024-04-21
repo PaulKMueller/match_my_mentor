@@ -1,5 +1,4 @@
-from app import db  # Ensure you import your db context appropriately
-from models import Mentor, Mentee, TimeSlot, Rating  # Import models
+from .models import db, Mentor, Mentee, TimeSlot, Rating  # Import models
 
 # Function to get mentor availability
 def get_mentor_availability():

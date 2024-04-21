@@ -1,44 +1,23 @@
 from flask import Flask, render_template, redirect, url_for, flash, request, jsonify
-from forms import MentorForm, MenteeForm, MentorRatingForm
+from .forms import MentorForm, MenteeForm, MentorRatingForm
 from flask_sqlalchemy import SQLAlchemy
 import qrcode
-from flask import send_file
+from flask import send_file, Blueprint
 from io import BytesIO
 from wtforms import StringField, IntegerField, TextAreaField, SubmitField, SelectField
 from wtforms.validators import DataRequired, NumberRange, Optional
 import base64
-from models import db, Mentee, Rating, Mentor, TimeSlot, SetupInfo
-from data_adapter import prepare_data_for_optimizer
-from optimizer import Optimizer
-import logging
+from .models import db, Mentee, Rating, Mentor, TimeSlot, SetupInfo
+from .data_adapter import prepare_data_for_optimizer
+from .optimizer import Optimizer
 
+main = Blueprint('main', __name__)
 
-
-def create_app():
-    app = Flask(__name__)
-    app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///mentoring.db'
-    app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-    app.config['SECRET_KEY'] = "my_secret_key"
-    app.config['WTF_CSRF_ENABLED'] = False
-
-    db.init_app(app)
-
-    with app.app_context():
-        db.create_all()
-        data = prepare_data_for_optimizer()
-        # print(data)
-        optimizer = Optimizer(data)
-        optimizer.solve()
-
-    return app
-
-app = create_app()
-
-@app.route("/")
+@main.route("/")
 def hello_world():
-    return redirect(url_for('setup'))
+    return redirect(url_for('main.setup'))
 
-@app.route('/setup', methods=['GET', 'POST'])
+@main.route('/setup', methods=['GET', 'POST'])
 def setup():
     setup_info = SetupInfo.query.first()  # Fetch the first setup info record, if it exists
     timeslots = TimeSlot.query.all()  # Query all timeslots
@@ -75,7 +54,7 @@ def setup():
             db.session.add(setup_info)
 
         db.session.commit()
-        return redirect(url_for('qr_code_mentor'))
+        return redirect(url_for('main.qr_code_mentor'))
 
     # Pass existing data to the template if it exists
     if request.method == 'GET':
@@ -86,7 +65,7 @@ def setup():
         else:
             return render_template('setup.html')
         
-@app.route('/delete-timeslot', methods=['POST'])
+@main.route('/delete-timeslot', methods=['POST'])
 def delete_timeslot():
     data = request.json
     timeslot_id = data['id']
@@ -98,7 +77,7 @@ def delete_timeslot():
     else:
         return jsonify({'success': False, 'message': 'Timeslot not found'}), 404
 
-@app.route('/update-mentee-rankings', methods=['POST'])
+@main.route('/update-mentee-rankings', methods=['POST'])
 def update_mentee_rankings():
     data = request.get_json()
     mentee_id = data['mentee_id']
@@ -126,7 +105,7 @@ def update_mentee_rankings():
         return jsonify({'success': False, 'message': 'Failed to update rankings: {}'.format(str(e))}), 500
 
     
-@app.route('/update-mentor', methods=['POST'])
+@main.route('/update-mentor', methods=['POST'])
 def update_mentor():
     data = request.json
     mentor_id = data['id']
@@ -141,7 +120,7 @@ def update_mentor():
     return jsonify({'message': 'Mentor not found'}), 404
 
 
-@app.route('/update-mentee', methods=['POST'])
+@main.route('/update-mentee', methods=['POST'])
 def update_mentee():
     mentee_id = request.json['id']
     new_rating = request.json['rating']
@@ -154,7 +133,7 @@ def update_mentee():
     return jsonify({'message': 'Rating not found'}), 404
 
 
-@app.route('/admin', methods=['GET', 'POST'])
+@main.route('/admin', methods=['GET', 'POST'])
 def admin():
     form = MentorForm()
     if form.validate_on_submit():
@@ -172,7 +151,7 @@ def admin():
         
         db.session.commit()
         flash('Mentor and timeslots registered successfully!', 'success')
-        return redirect(url_for('admin'))
+        return redirect(url_for('main.admin'))
     
     # Query all mentors and their timeslots
     mentors_with_timeslots = Mentor.query.all()
@@ -193,9 +172,9 @@ def admin():
 
     return render_template('admin.html', form=form, mentors_data=mentors_data, mentees_data=mentees_data)
 
-@app.route('/qr_code_mentor')
+@main.route('/qr_code_mentor')
 def qr_code_mentor():
-    mentor_form_url = url_for('mentor_form', _external=True)
+    mentor_form_url = url_for('main.mentor_form', _external=True)
 
     # Create QR for mentor
     qr_mentor = qrcode.QRCode(
@@ -215,10 +194,10 @@ def qr_code_mentor():
     # Pass the QR data to the template
     return render_template('qr_codes.html', form_name="Mentor Form", qr_code=qr_mentor_data)
 
-@app.route('/qr_code_mentee')
+@main.route('/qr_code_mentee')
 def qr_code_mentee():
     # Replace the URL below with the actual route to your mentee form
-    mentee_form_url = url_for('mentee_form', _external=True)
+    mentee_form_url = url_for('main.mentee_form', _external=True)
 
     # Create QR for mentee
     qr_mentee = qrcode.QRCode(
@@ -239,11 +218,11 @@ def qr_code_mentee():
     return render_template('qr_codes.html', form_name="Mentee Form", qr_code=qr_mentee_data)
 
 
-@app.route('/confirmation_page')
+@main.route('/confirmation_page')
 def confirmation_page():
     return render_template('confirmation_page.html')
 
-@app.route('/mentor_form', methods=['GET', 'POST'])
+@main.route('/mentor_form', methods=['GET', 'POST'])
 def mentor_form():
     form = MentorForm()
     if form.validate_on_submit():
@@ -261,12 +240,12 @@ def mentor_form():
         db.session.add(mentor)
         db.session.commit()
         flash('Mentor and timeslots registered successfully!', 'success')
-        return redirect(url_for('confirmation_page'))  # Make sure to redirect to a confirmation or another appropriate page
+        return redirect(url_for('main.confirmation_page'))  # Make sure to redirect to a confirmation or another appropriate page
 
     return render_template('mentor_form.html', form=form)
 
 
-@app.route('/mentee_form', methods=['GET', 'POST'])
+@main.route('/mentee_form', methods=['GET', 'POST'])
 def mentee_form():
     form = MenteeForm()
     mentors = Mentor.query.all()
@@ -288,7 +267,7 @@ def mentee_form():
         
         db.session.commit()
         flash('Preferences submitted successfully!', 'success')
-        return redirect(url_for('confirmation_page'))
+        return redirect(url_for('main.confirmation_page'))
     else:
         print("Form is not valid")
         print(form.errors)
@@ -301,7 +280,7 @@ def mentee_form():
     mentors_and_forms = zip(mentor_names, form.mentor_ratings)
     return render_template('mentee_form.html', form=form, mentors_and_forms=mentors_and_forms)
 
-@app.route('/matching')
+@main.route('/matching')
 def index():
     # Prepare data for the optimizer
     data = prepare_data_for_optimizer()  # You need to define this based on your needs
@@ -316,4 +295,4 @@ def index():
 
 
 if __name__ == "__main__":
-    app.run(host='0.0.0.0', port=5000) 
+    main.run(host='0.0.0.0', port=5000) 

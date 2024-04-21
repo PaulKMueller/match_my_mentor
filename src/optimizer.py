@@ -3,14 +3,14 @@
 # class Optimizer:
 #     def __init__(self):
 
-from data_adapter import prepare_data_for_optimizer
-from models import Mentee, Mentor
+from .data_adapter import prepare_data_for_optimizer
+from .models import Mentee, Mentor
 
 
 import pulp
 
 class Optimizer:
-    def __init__(self, data):
+    def __init__(self, data:dict):
         self.high_preference_penalty = 100  # This should be higher than any undesirable score
         self.mentees = data["mentees"]
         self.mentors = data["mentors"]
@@ -101,5 +101,20 @@ class Optimizer:
                             'mentee': mentee_names[int(mentee)],
                             'mentor': mentor_name
                         })
-        return results_by_timeslot
+        if self.check_results():
+            print("Results are valid")
+            return results_by_timeslot
+        else:
+            print("Invalid results found")
+            return results_by_timeslot
+    
+    def check_results(self):
+        # Check if mentor or mentee is assigned multiple times per timeslot
+        for timeslot in self.timeslots:
+            for mentor in self.mentors:
+                if sum([pulp.value(self.x[mentee][mentor][timeslot]) for mentee in self.mentees]) > 1:
+                    return False
+            for mentee in self.mentees:
+                if sum([pulp.value(self.x[mentee][mentor][timeslot]) for mentor in self.mentors]) > 1:
+                    return False
 
