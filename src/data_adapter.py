@@ -1,30 +1,21 @@
-from .models import db, Mentor, Mentee, TimeSlot, Rating  # Import models
-
 # Function to get mentor availability
-def get_mentor_availability():
-    mentors_timeslots = db.session.query(Mentor.id, TimeSlot.id, TimeSlot.start_time, TimeSlot.end_time).join(
-        Mentor.timeslots).all()
+def get_mentor_availability(mentors_timeslots_data):
     availability = {}
-    for mentor_id, timeslot_id, start_time, end_time in mentors_timeslots:
-        timeslot = f"{start_time}-{end_time}"
-        availability[(str(mentor_id), timeslot)] = True
+    for mentor_id, timeslot_id, start_time, end_time in mentors_timeslots_data:
+        availability[(mentor_id, timeslot_id)] = True
     return availability
 
 # Function to get mentee preferences
-def get_mentee_preferences():
-    mentee_ratings = db.session.query(Mentee.id, Rating.mentor_id, Rating.rating).join(
-        Mentee.ratings).all()
+def get_mentee_preferences(mentee_ratings_data):
     preferences = {}
-    for mentee_id, mentor_id, rating in mentee_ratings:
-        preferences[(str(mentee_id), str(mentor_id))] = rating
+    for mentee_id, mentor_id, rating in mentee_ratings_data:
+        preferences[(mentee_id, mentor_id)] = rating
     return preferences
 
-# Main function to prepare data
-def prepare_data_for_optimizer():
-
-    print("Data preparation started")
-    mentor_availability = get_mentor_availability()
-    mentee_preferences = get_mentee_preferences()
+# Example call to prepare data for the optimizer
+def prepare_data_for_optimizer(mentors_timeslots_data, mentee_ratings_data):
+    mentor_availability = get_mentor_availability(mentors_timeslots_data)
+    mentee_preferences = get_mentee_preferences(mentee_ratings_data)
 
     # Assuming your optimizer needs a list of mentors, mentees, and timeslots
     mentors = list({key[0] for key in mentor_availability.keys()})

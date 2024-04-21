@@ -281,9 +281,13 @@ def mentee_form():
     return render_template('mentee_form.html', form=form, mentors_and_forms=mentors_and_forms)
 
 @main.route('/matching')
-def index():
+def matching():
+    mentors_timeslots = db.session.query(Mentor.id, TimeSlot.id, TimeSlot.start_time, TimeSlot.end_time).join(
+        Mentor.timeslots).all()
+    mentee_ratings = db.session.query(Mentee.id, Rating.mentor_id, Rating.rating).join(
+        Mentee.ratings).all()
     # Prepare data for the optimizer
-    data = prepare_data_for_optimizer()  # You need to define this based on your needs
+    data = prepare_data_for_optimizer(mentors_timeslots, mentee_ratings)  # You need to define this based on your needs
     print(data)
     optimizer = Optimizer(data)
     optimizer.solve()

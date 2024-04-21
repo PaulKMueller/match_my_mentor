@@ -1,7 +1,6 @@
 from flask import Flask
 
 from .models import db
-from .data_adapter import prepare_data_for_optimizer
 from .optimizer import Optimizer
 from .app import main
 
@@ -18,9 +17,5 @@ def create_app(database_uri='sqlite:///mentoring.db'):
 
     with app.app_context():
         db.create_all()
-        data = prepare_data_for_optimizer()
-        # print(data)
-        optimizer = Optimizer(data)
-        optimizer.solve()
 
     return app
