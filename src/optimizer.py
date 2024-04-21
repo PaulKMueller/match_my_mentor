@@ -4,7 +4,7 @@
 #     def __init__(self):
 
 from .data_adapter import prepare_data_for_optimizer
-from .models import Mentee, Mentor
+from .models import Mentee, Mentor, TimeSlot
 
 
 import pulp
@@ -86,10 +86,11 @@ class Optimizer:
         # Fetch all mentors and mentees first to avoid repeated database queries
         mentor_names = {mentor.id: mentor.name for mentor in Mentor.query.all()}
         mentee_names = {mentee.id: mentee.name for mentee in Mentee.query.all()}
+        time_slot_names = {time_slot.id: f"{time_slot.start_time}-{time_slot.end_time}" for time_slot in TimeSlot.query.all()}
         
         results_by_timeslot = {}
         for timeslot in self.timeslots:
-            results_by_timeslot[timeslot] = []
+            results_by_timeslot[time_slot_names[timeslot]] = []
             for mentee in self.mentees:
                 for mentor in self.mentors:
                     if pulp.value(self.x[mentee][mentor][timeslot]) == 1:
@@ -97,7 +98,7 @@ class Optimizer:
                             mentor_name = "Break"
                         else:
                             mentor_name = mentor_names.get(int(mentor), 'None')  # Use 'None' or similar if no mentor
-                        results_by_timeslot[timeslot].append({
+                        results_by_timeslot[time_slot_names[timeslot]].append({
                             'mentee': mentee_names[int(mentee)],
                             'mentor': mentor_name
                         })
