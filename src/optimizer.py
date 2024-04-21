@@ -117,4 +117,6 @@ class Optimizer:
             for mentee in self.mentees:
                 if sum([pulp.value(self.x[mentee][mentor][timeslot]) for mentor in self.mentors]) > 1:
                     return False
+        else:
+            return True
 
