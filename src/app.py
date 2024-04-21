@@ -105,6 +105,33 @@ def update_mentee_rankings():
         return jsonify({'success': False, 'message': 'Failed to update rankings: {}'.format(str(e))}), 500
 
     
+@main.route('/update-availability', methods=['POST'])
+def update_availability():
+    try:
+        data = request.get_json()
+        mentor_id = int(data['mentor_id'])
+        timeslot = data['timeslot']
+        is_available = data['is_available']
+
+        mentor = Mentor.query.get(mentor_id)
+        timeslot_entry = TimeSlot.query.filter_by(start_time=timeslot.split('-')[0], end_time=timeslot.split('-')[1]).first()
+
+        if not mentor or not timeslot_entry:
+            return jsonify({'success': False, 'message': 'Mentor or timeslot not found'}), 404
+
+        if is_available:
+            if timeslot_entry not in mentor.timeslots:
+                mentor.timeslots.append(timeslot_entry)
+        else:
+            if timeslot_entry in mentor.timeslots:
+                mentor.timeslots.remove(timeslot_entry)
+
+        db.session.commit()
+        return jsonify({'success': True, 'message': 'Availability updated successfully'})
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({'success': False, 'message': str(e)}), 500
+
 @main.route('/update-mentor', methods=['POST'])
 def update_mentor():
     data = request.json
@@ -170,7 +197,7 @@ def admin():
         rankings = {rating.mentor_id: rating.rating for rating in mentee.ratings}
         mentees_data.append({'mentee': mentee, 'rankings': rankings})
 
-    return render_template('admin.html', form=form, mentors_data=mentors_data, mentees_data=mentees_data)
+    return render_template('admin.html', form=form, mentors_data=mentors_data, mentees_data=mentees_data, all_timeslots=[f"{ts.start_time}-{ts.end_time}" for ts in TimeSlot.query.all()])
 
 @main.route('/qr_code_mentor')
 def qr_code_mentor():
