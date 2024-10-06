@@ -1,108 +1,271 @@
-<!DOCTYPE html>
-<html>
-
 <head>
-    <title>Setup</title>
-    <!-- Include any necessary CSS/JS here -->
-    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css" rel="stylesheet">
 
-    <!-- Favicon code -->
+    <title>Mentoring Event Setup</title>
+    <!-- Materialize CSS for Material Design styling -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+
+    <!-- Favicon Links -->
     <link rel="apple-touch-icon" sizes="180x180" href="{{ url_for('static', filename='apple-touch-icon.png') }}">
     <link rel="icon" type="image/png" sizes="32x32" href="{{ url_for('static', filename='favicon-32x32.png') }}">
-    <link rel="icon" type="image/png" sizes="16x16" href="{{ url_for('static', filename='favicon-16x16.png') }}">
     <link rel="manifest" href="{{ url_for('static', filename='site.webmanifest') }}">
+
+    <!-- Custom styles for layout improvements -->
+    <style>
+        /* Container for the form to center it */
+        .container {
+            margin-top: 30px;
+            max-width: 900px;
+        }
+
+        /* Ensure the time slot rows are aligned and spaced properly */
+        .timeslot {
+            margin-bottom: 15px;
+            padding: 15px;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            background-color: #fafafa;
+            width: auto;
+        }
+
+        /* Align the delete button properly */
+        .delete-btn-container {
+            display: flex;
+            justify-content: flex-end;
+            align-items: center;
+            overflow: visible;
+            /* Ensure the button isn't cut off */
+        }
+
+        .delete-btn {
+            min-width: 100px;
+            /* Ensure the delete button is wide enough */
+        }
+
+        /* Add spacing for submit and add buttons */
+        .action-buttons {
+            text-align: center;
+            margin-top: 30px;
+        }
+
+        /* Custom input field margin and error message style */
+        .static-label {
+            margin-bottom: 10px;
+            font-weight: bold;
+        }
+
+        .error-message {
+            color: red;
+            font-size: 0.9em;
+        }
+
+        /* Add space between buttons */
+        #add-timeslot-btn {
+            margin-top: 20px;
+            margin-bottom: 20px;
+            /* Add space between the buttons */
+        }
+
+        /* Responsive layout for mobile devices */
+        @media (max-width: 600px) {
+            .delete-btn-container {
+                justify-content: center;
+            }
+
+            .timeslot {
+                padding: 10px;
+            }
+
+            .action-buttons {
+                margin-top: 20px;
+            }
+        }
+    </style>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            // Select all the time inputs in the timeslot rows
+            const timeInputs = document.querySelectorAll('input[type="time"]');
+
+            // Loop over each input and trigger focus and blur events
+            timeInputs.forEach(function (input) {
+                input.focus(); // Simulate focus (user clicked on the input)
+                input.blur();  // Simulate blur (user clicked away from the input)
+            });
+        });
+    </script>
 </head>
 
 <body>
-    <h2>Setting up your mentoring event.</h2>
-    <p>Please input the details of your event below.</p>
-    <form method="post">
-        <div id="time-slots">
-            <h3>Which time slots are there?</h3>
-            <!-- Prefill existing timeslots -->
-            {% if timeslots %}
-                {% for slot in timeslots %}
-                <div class="timeslot row" id="timeslot-{{ slot.id }}">
-                    <!-- Include a hidden input for the timeslot ID -->
-                    <input type="hidden" name="timeslot_ids[]" value="{{ slot.id }}">
-                    
-                    <div class="input-field col s2">
-                        <label>Timeslot ID: {{ slot.id }}</label>
+    <div class="container">
+        <h3 class="center-align">Setup Your Mentoring Event</h3>
+        <p class="flow-text center-align">Please provide the details for the time slots of your event below.</p>
+
+        <form method="POST" class="row">
+            {{ form.hidden_tag() }} <!-- CSRF token -->
+
+            <!-- Section for Time Slots -->
+            <div class="col s12">
+                <h5>Time Slots</h5>
+
+                <!-- Dynamically generated time slots go here -->
+                <div id="time-slots">
+                    {% for timeslot in form.timeslots %}
+                    <div class="timeslot row" id="timeslot-{{ timeslot.timeslot_id.data }}"> <!-- Add id here -->
+                        {{ timeslot.timeslot_id }} <!-- Hidden field for timeslot ID -->
+
+                        <!-- Start Time Input -->
+                        <div class="col s5">
+                            <input type="time" id="start-time-{{ loop.index }}" name="{{ timeslot.start_time.name }}"
+                                value="{{ timeslot.start_time.data|safe }}" required>
+                            {% if timeslot.start_time.errors %}
+                            <span class="error-message">{{ timeslot.start_time.errors[0] }}</span>
+                            {% endif %}
+                        </div>
+
+                        <!-- End Time Input -->
+                        <div class="col s5">
+                            <input type="time" id="end-time-{{ loop.index }}" name="{{ timeslot.end_time.name }}"
+                                value="{{ timeslot.end_time.data|safe }}" required>
+                            {% if timeslot.end_time.errors %}
+                            <span class="error-message">{{ timeslot.end_time.errors[0] }}</span>
+                            {% endif %}
+                        </div>
+
+                        <!-- Delete Button -->
+                        <div class="col s5 delete-btn-container">
+                            <button type="button" class="btn red waves-effect waves-light delete-btn"
+                                onclick="deleteTimeslot('{{ timeslot.timeslot_id.data }}')">
+                                <i class="material-icons">delete</i>
+                            </button>
+                        </div>
                     </div>
-                    <div class="input-field col s5">
-                        <input type="time" name="start_times[]" class="browser-default" value="{{ slot.start_time }}">
-                    </div>
-                    <div class="input-field col s5">
-                        <input type="time" name="end_times[]" class="browser-default" value="{{ slot.end_time }}">
-                    </div>
-                    <div class="input-field col s1">
-                        <button type="button" onclick="deleteTimeslot({{ slot.id }})" class="delete-btn">
-                            🗑️ <!-- You can replace this with an icon from a library like Font Awesome -->
-                        </button>
-                    </div>
+                    {% endfor %}
                 </div>
-                {% endfor %}
-            {% endif %}
-            <!-- Button to add a new timeslot -->
-            <button type="button" onclick="addTimeSlot()">Add Timeslot</button>
-        </div>
 
-        <label for="num_mentors">Number of Mentors:</label>
-        <input type="number" id="num_mentors" name="num_mentors" value="{{ setup_info.num_mentors if setup_info else '' }}" min="0" required>
+                <!-- Add New Time Slot Button -->
+                <div class="action-buttons">
+                    <button id="add-timeslot-btn" type="button" class="btn green waves-effect waves-light"
+                        onclick="addTimeSlot()">Add New Time Slot</button>
+                </div>
+            </div>
 
-        <label for="num_participants">Number of Participants:</label>
-        <input type="number" id="num_participants" name="num_participants" value="{{ setup_info.num_participants if setup_info else '' }}" min="0" required>
+            <!-- Form Submission Button -->
+            <div class="action-buttons">
+                <button type="submit" class="btn blue waves-effect waves-light"
+                    onsubmit="activateTimeFields()">Submit</button>
+            </div>
+        </form>
+    </div>
+    <!-- JavaScript for adding timeslot -->
+    <script>
+        function activateTimeFields() {
+            const timeslotRows = document.querySelectorAll('.timeslot');
 
-        <button type="submit">Submit</button>
-    </form>
+            // Loop over each timeslot row and simulate a click
+            timeslotRows.forEach(function (row) {
+                // Find a specific clickable element within the row (e.g., the first input)
+                const input = row.querySelector('input[type="time"]');
 
+                // Simulate a click on the input to "activate" the row
+                if (input) {
+                    input.click();
+                }
+            });
+        }
+    </script>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            // Select all the time inputs in the timeslot rows
+            const timeInputs = document.querySelectorAll('input[type="time"]');
+
+            // Loop over each input and manually trigger the change event
+            timeInputs.forEach(function (input) {
+                const currentValue = input.value;  // Get the current value
+                input.value = '';  // Temporarily clear the value to simulate a change
+                input.value = currentValue;  // Set the value back to trigger change
+                input.dispatchEvent(new Event('change'));  // Dispatch the change event
+            });
+        });
+    </script>
     <script>
         function addTimeSlot() {
             const container = document.getElementById('time-slots');
-        // Add a timeslot without an ID since it's a new one
-        const inputHTML = `
-        <div class="timeslot row">
-            <div class="input-field col s2">
-                <label>New Timeslot</label>
+
+            // Get the current number of timeslot fields (FieldList entries)
+            const timeslotCount = document.querySelectorAll('.timeslot').length;
+
+            // Create the new time slot fields with the correct naming structure
+            const inputHTML = `
+            <div class="timeslot row">
+                <div class="input-field col s4">
+                    <input type="time" name="timeslots-${timeslotCount}-start_time" class="browser-default" required>
+                </div>
+                <div class="input-field col s4">
+                    <input type="time" name="timeslots-${timeslotCount}-end_time" class="browser-default" required>
+                </div>
+                <div class="input-field col s2 delete-slot">
+                    <button type="button" class="delete-btn waves-effect waves-light btn red" onclick="this.closest('.timeslot').remove()">
+                        <i class="material-icons">delete</i>
+                    </button>
+                </div>
+                <input type="hidden" name="timeslots-${timeslotCount}-timeslot_id" value="">
             </div>
-            <div class="input-field col s5">
-                <input type="time" name="start_times[]" class="browser-default" required>
-            </div>
-            <div class="input-field col s5">
-                <input type="time" name="end_times[]" class="browser-default" required>
-            </div>
-        </div>
-        `;
+            `;
             container.insertAdjacentHTML('beforeend', inputHTML);
         }
+    </script>
+
+    <!-- Materialize JS -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            M.FormSelect.init(document.querySelectorAll('select'));
+        });
+    </script>
+    <script>
         function deleteTimeslot(timeslotId) {
+            console.log("The timeslotID is:", timeslotId);  // Debugging
+
             if (!confirm('Are you sure you want to delete this timeslot?')) {
-                return; // Do nothing if the user cancels the confirmation dialog
+                return;  // Do nothing if the user cancels the confirmation dialog
             }
 
-            fetch('/delete-timeslot', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({ id: timeslotId }),
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    const timeslotElement = document.getElementById('timeslot-' + timeslotId);
-                    timeslotElement.remove(); // Remove the timeslot from the DOM
-                } else {
-                    alert('There was an error deleting the timeslot.');
-                }
-            })
-            .catch(error => {
-                console.error('Error:', error);
-            });
-        }
+            // Find the timeslot element in the DOM
+            const timeslotElement = document.getElementById('timeslot-' + timeslotId);
 
+            if (!timeslotElement) {
+                console.error("Could not find timeslot element with ID:", 'timeslot-' + timeslotId);
+                return;
+            }
+
+            // If it's an existing timeslot with a valid timeslotId, send the request to the server
+            if (timeslotId) {
+                fetch('/delete-timeslot', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ id: timeslotId }),
+                })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            console.log("Timeslot deleted successfully.");
+                            // Remove the timeslot element from the DOM upon successful deletion
+                            timeslotElement.remove();
+                        } else {
+                            alert('There was an error deleting the timeslot.');
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                    });
+            }
+        }
     </script>
+
     <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
     <script>
         document.addEventListener('DOMContentLoaded', function () {

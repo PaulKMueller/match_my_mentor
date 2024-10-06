@@ -11,7 +11,7 @@ class Mentor(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(100), nullable=False)
     job_description = db.Column(db.Text, nullable=False)
-    timeslots = db.relationship('TimeSlot', secondary=mentor_timeslot, lazy='dynamic')
+    timeslots = db.relationship('TimeSlot', secondary=mentor_timeslot, lazy='dynamic', back_populates='mentors')
 
 class Mentee(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -25,10 +25,10 @@ class Rating(db.Model):
     rating = db.Column(db.Integer, nullable=False)
 
 class TimeSlot(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    start_time = db.Column(db.String(5))
-    end_time = db.Column(db.String(5))
-    mentors = db.relationship('Mentor', secondary=mentor_timeslot, lazy='dynamic')
+    id = db.Column(db.String, primary_key=True)
+    start_time = db.Column(db.Time, nullable=False)
+    end_time = db.Column(db.Time, nullable=False)
+    mentors = db.relationship('Mentor', secondary=mentor_timeslot, lazy='dynamic', back_populates='timeslots')
 
 
 class SetupInfo(db.Model):

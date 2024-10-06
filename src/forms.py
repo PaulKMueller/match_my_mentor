@@ -1,12 +1,23 @@
-from flask_wtf import FlaskForm, Form
-from wtforms import StringField, IntegerField, TextAreaField, SubmitField, SelectField, FormField, FieldList, SelectMultipleField
-from wtforms.validators import DataRequired, NumberRange, Optional, ValidationError
+from flask_wtf import FlaskForm
+from wtforms import (
+    FieldList,
+    FormField,
+    HiddenField,
+    SelectField,
+    SelectMultipleField,
+    StringField,
+    SubmitField,
+    TextAreaField,
+    TimeField,
+)
+from wtforms.validators import DataRequired, ValidationError
+
 from .models import Mentee, Mentor, TimeSlot
+
 
 class MentorForm(FlaskForm):
     name = StringField('Mentor Name', validators=[DataRequired()])
     job_description = TextAreaField('Job Description', validators=[DataRequired()])
-    # Assume Timeslot is a model that contains all timeslots
     timeslots = SelectMultipleField('Available Timeslots', choices=[], coerce=int)
     submit = SubmitField('Register')
 
@@ -35,3 +46,18 @@ class MenteeForm(FlaskForm):
     def validate_name(self, field):
         if Mentee.query.filter_by(name=field.data).first():
             raise ValidationError('This name already exists in the database.')
+        
+class TimeSlotForm(FlaskForm):
+    timeslot_id = HiddenField('ID')
+    start_time = TimeField('Start Time', format='%H:%M', validators=[DataRequired()])
+    end_time = TimeField('End Time', format='%H:%M', validators=[DataRequired()])
+
+    def validate_end_time(self, field):
+        # print("Validate TimeSlotForm")
+        # print(f"TimeSlot validation succeeded: {self.end_time.data > self.start_time.data}")
+        if self.end_time.data <= self.start_time.data:
+            raise ValidationError('End time must be after start time.')
+
+class TimeSlotsForm(FlaskForm):
+    timeslots = FieldList(FormField(TimeSlotForm), min_entries=0)  # To handle a list of time slots
+    submit = SubmitField('Submit')

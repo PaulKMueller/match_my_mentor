@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -11,8 +12,17 @@
     <link rel="icon" type="image/png" sizes="32x32" href="{{ url_for('static', filename='favicon-32x32.png') }}">
     <link rel="icon" type="image/png" sizes="16x16" href="{{ url_for('static', filename='favicon-16x16.png') }}">
     <link rel="manifest" href="{{ url_for('static', filename='site.webmanifest') }}">
+
+    <style>
+        .container {
+            margin-top: 30px;
+            max-width: 900px;
+        }
+    </style>
 </head>
+
 <body>
+    <div class="container"></div>
     <h2>Register yourself as a Mentor</h2>
     <form action="" method="post" class="input-field">
         {{ form.hidden_tag() }}
@@ -29,17 +39,18 @@
         </p>
         <div class="checkbox-group">
             {% for subfield in form.timeslots %}
-                <p>
-                    <label>
-                        <input type="checkbox" name="{{ subfield.name }}" value="{{ subfield.data }}" id="timeslot-{{ subfield.id }}" />
-                        <span>{{ subfield.label.text }}</span>
-                    </label>
-                </p>
+            <p>
+                <label>
+                    <input type="checkbox" name="{{ subfield.name }}" value="{{ subfield.data }}"
+                        id="timeslot-{{ subfield.id }}" />
+                    <span>{{ subfield.label.text }}</span>
+                </label>
+            </p>
             {% endfor %}
         </div>
         <p>{{ form.submit() }}</p>
     </form>
-    
+
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
     <script>
@@ -48,4 +59,5 @@
         });
     </script>
 </body>
+
 </html>
