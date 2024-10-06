@@ -5,53 +5,117 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Admin Interface</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    
+    <!-- Link to Materialize CSS -->
     <link href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css" rel="stylesheet">
+
+    <!-- Custom Styles -->
+    <style>
+        body {
+            background-color: #f5f5f5;
+            font-family: 'Roboto', sans-serif;
+        }
+        .container {
+            margin-top: 50px;
+            max-width: 700px;
+            background-color: #ffffff;
+            padding: 40px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+        h2 {
+            font-size: 2.5rem;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .input-field {
+            margin-bottom: 20px;
+        }
+        label {
+            font-weight: bold;
+            color: #555;
+        }
+        .checkbox-group {
+            margin-bottom: 30px;
+        }
+        input[type="checkbox"]+span {
+            color: #000;
+            font-size: 1.2rem;
+        }
+        input[type="text"], textarea {
+            margin-bottom: 20px;
+            padding: 10px;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+        }
+        .submit-btn {
+            display: block;
+            width: 100%;
+            padding: 10px;
+            border: none;
+            border-radius: 5px;
+            text-align: center;
+            font-size: 1.2rem;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        @media (max-width: 600px) {
+            .container {
+                padding: 20px;
+            }
+            h2 {
+                font-size: 2rem;
+            }
+        }
+    </style>
+
     <!-- Favicon code -->
     <link rel="apple-touch-icon" sizes="180x180" href="{{ url_for('static', filename='apple-touch-icon.png') }}">
     <link rel="icon" type="image/png" sizes="32x32" href="{{ url_for('static', filename='favicon-32x32.png') }}">
     <link rel="icon" type="image/png" sizes="16x16" href="{{ url_for('static', filename='favicon-16x16.png') }}">
     <link rel="manifest" href="{{ url_for('static', filename='site.webmanifest') }}">
-
-    <style>
-        .container {
-            margin-top: 30px;
-            max-width: 900px;
-        }
-    </style>
 </head>
 
 <body>
-    <div class="container"></div>
-    <h2>Register yourself as a Mentor</h2>
-    <form action="" method="post" class="input-field">
-        {{ form.hidden_tag() }}
-        <p>
-            {{ form.name.label }}<br>
-            {{ form.name(size=32) }}
-        </p>
-        <p>
-            {{ form.job_description.label }}<br>
-            {{ form.job_description(rows=4) }}
-        </p>
-        <p>
-            {{ form.timeslots.label }}
-        </p>
-        <div class="checkbox-group">
-            {% for subfield in form.timeslots %}
-            <p>
-                <label>
-                    <input type="checkbox" name="{{ subfield.name }}" value="{{ subfield.data }}"
-                        id="timeslot-{{ subfield.id }}" />
-                    <span>{{ subfield.label.text }}</span>
-                </label>
-            </p>
-            {% endfor %}
-        </div>
-        <p>{{ form.submit() }}</p>
-    </form>
+    <div class="container">
+        <h2>Register yourself as a Mentor</h2>
+        <form action="" method="post">
+            {{ form.hidden_tag() }}
 
+            <!-- Mentor Name Input -->
+            <div class="input-field">
+                <label for="name">{{ form.name.label }}</label>
+                {{ form.name(class_="browser-default") }}
+            </div>
 
+            <!-- Job Description Input -->
+            <div class="input-field">
+                <label for="job_description">{{ form.job_description.label }}</label>
+                {{ form.job_description(class_="browser-default", rows=4) }}
+            </div>
+
+            <!-- Timeslots Checkboxes -->
+            <div class="checkbox-group">
+                <p><strong>{{ form.timeslots.label }}</strong></p>
+                {% for subfield in form.timeslots %}
+                <p>
+                    <label>
+                        <input type="checkbox" name="{{ subfield.name }}" value="{{ subfield.data }}"
+                            id="timeslot-{{ subfield.id }}" />
+                        <span>{{ subfield.label.text }}</span>
+                    </label>
+                </p>
+                {% endfor %}
+            </div>
+
+            <!-- Submit Button -->
+            <div class="input-field">
+                {{ form.submit(class_="submit-btn") }}
+            </div>
+        </form>
+    </div>
+
+    <!-- Materialize JS -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
     <script>
         document.addEventListener('DOMContentLoaded', function () {
