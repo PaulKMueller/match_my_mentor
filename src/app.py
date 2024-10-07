@@ -356,6 +356,9 @@ def mentee_form():
         for mentor in mentors:
             form.mentor_ratings.append_entry(MentorRatingForm())
 
+        for subform in form.mentor_ratings.entries:
+            subform.rating.data = 6  # Setting each rating default to 6
+
     if form.validate_on_submit():
         mentee = Mentee(name=form.name.data)
         db.session.add(mentee)
@@ -373,7 +376,6 @@ def mentee_form():
         flash("Preferences submitted successfully!", "success")
         return redirect(url_for("main.confirmation_page"))
     else:
-        print("Form is not valid")
         print(form.errors)
         if request.method == "POST":
             # Form was submitted but didn't validate

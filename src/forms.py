@@ -23,7 +23,7 @@ class MentorForm(FlaskForm):
 
     def __init__(self, *args, **kwargs):
         super(MentorForm, self).__init__(*args, **kwargs)
-        self.timeslots.choices = [(timeslot.id, f"{timeslot.start_time} to {timeslot.end_time}") for timeslot in TimeSlot.query.order_by(TimeSlot.start_time).all()]
+        self.timeslots.choices = [(timeslot.id, f"{timeslot.start_time.strftime('%H:%M')} to {timeslot.end_time.strftime('%H:%M')}") for timeslot in TimeSlot.query.order_by(TimeSlot.start_time).all()]
 
 
     def validate_name(self, field):
@@ -33,9 +33,10 @@ class MentorForm(FlaskForm):
 class MentorRatingForm(FlaskForm):
     rating = SelectField(
         'Rating',
-        choices=[1, 2, 3, 4, 5, 6],
+        choices=[(1, '1'), (2, '2'), (3, '3'), (4, '4'), (5, '5'), (6, '6')],
         validators=[DataRequired()],
-        coerce=int
+        coerce=int,
+        default=6
     )
 
 class MenteeForm(FlaskForm):
