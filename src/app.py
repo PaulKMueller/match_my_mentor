@@ -7,7 +7,7 @@ from io import BytesIO
 from wtforms import StringField, IntegerField, TextAreaField, SubmitField, SelectField
 from wtforms.validators import DataRequired, NumberRange, Optional
 import base64
-from .models import db, Mentee, Rating, Mentor, TimeSlot, SetupInfo, mentor_timeslot
+from .models import db, Mentee, Rating, Mentor, TimeSlot, mentor_timeslot
 from .data_adapter import prepare_data_for_optimizer
 from .optimizer import Optimizer
 
@@ -389,6 +389,22 @@ def mentee_form():
         "mentee_form.html", form=form, mentors_and_forms=mentors_and_forms
     )
 
+@main.route('/reset-database', methods=['POST'])
+def reset_database():
+    try:
+        # Delete all data from the tables
+        Mentor.query.delete()
+        Mentee.query.delete()
+        TimeSlot.query.delete()
+        Rating.query.delete()
+        
+        # Commit the changes to the database
+        db.session.commit()
+        return jsonify({'success': True})
+    except Exception as e:
+        print(f"Error resetting database: {e}")
+        db.session.rollback()
+        return jsonify({'success': False}), 500
 
 @main.route("/matching")
 def matching():

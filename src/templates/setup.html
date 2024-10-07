@@ -160,7 +160,35 @@
                     onsubmit="activateTimeFields()">Submit</button>
             </div>
         </form>
+
+        <div class="action-buttons">
+            <button type="button" class="btn red waves-effect waves-light" onclick="resetDatabase()">Reset</button>
+        </div>
     </div>
+
+    <script>
+        function resetDatabase() {
+            if (confirm("Are you sure you want to reset all data? This action cannot be undone.")) {
+                fetch('/reset-database', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        alert('Database reset successfully.');
+                        location.reload(); // Refresh the page
+                    } else {
+                        alert('Failed to reset the database.');
+                    }
+                })
+                .catch(error => console.error('Error:', error));
+            }
+        }
+    </script>
+
     <!-- JavaScript for adding timeslot -->
     <script>
         function activateTimeFields() {

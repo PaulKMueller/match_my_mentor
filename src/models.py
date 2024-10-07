@@ -29,9 +29,3 @@ class TimeSlot(db.Model):
     start_time = db.Column(db.Time, nullable=False)
     end_time = db.Column(db.Time, nullable=False)
     mentors = db.relationship('Mentor', secondary=mentor_timeslot, lazy='dynamic', back_populates='timeslots')
-
-
-class SetupInfo(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    num_mentors = db.Column(db.Integer, nullable=False)
-    num_participants = db.Column(db.Integer, nullable=False)
