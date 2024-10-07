@@ -4,8 +4,65 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Admin Interface</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    
+    <!-- Materialize CSS -->
     <link href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css" rel="stylesheet">
+
+    <!-- Custom Styles -->
+    <style>
+        body {
+            background-color: #f5f5f5;
+            font-family: 'Roboto', sans-serif;
+        }
+        .container {
+            margin-top: 50px;
+            max-width: 1200px;
+            background-color: #ffffff;
+            padding: 40px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+        h2 {
+            font-size: 2rem;
+            margin-bottom: 20px;
+        }
+        table {
+            margin-bottom: 40px;
+        }
+        table.striped {
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        }
+        td, th {
+            text-align: center;
+        }
+        .table-container {
+            margin-bottom: 30px;
+        }
+        button {
+            border: none;
+            border-radius: 5px;
+            padding: 8px 16px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+        .editable, .editable-ranking {
+            border-bottom: 1px solid #ccc;
+            padding: 5px;
+        }
+        .editable:hover, .editable-ranking:hover {
+            background-color: #e8f5e9;
+        }
+        @media (max-width: 600px) {
+            .container {
+                padding: 20px;
+            }
+            h2 {
+                font-size: 1.5rem;
+            }
+        }
+    </style>
+
+    <!-- Favicon code -->
     <link rel="apple-touch-icon" sizes="180x180" href="{{ url_for('static', filename='apple-touch-icon.png') }}">
     <link rel="icon" type="image/png" sizes="32x32" href="{{ url_for('static', filename='favicon-32x32.png') }}">
     <link rel="icon" type="image/png" sizes="16x16" href="{{ url_for('static', filename='favicon-16x16.png') }}">
@@ -14,30 +71,38 @@
 <body>
     <div class="container">
         <!-- Existing Mentor and Mentee Tables -->
+        <h2>Mentor Information</h2>
         <div class="table-container">
-            <table class="striped">
-                <tr>
-                    <th>Mentor Name</th>
-                    <th>Job Description</th>
-                </tr>
-                {% for mentor in mentors_data %}
-                <tr data-id="{{ mentor.mentor.id }}">
-                    <td contenteditable="true" class="editable" data-column="name">{{ mentor.mentor.name }}</td>
-                    <td contenteditable="true" class="editable" data-column="job_description">{{ mentor.mentor.job_description }}</td>
-                    <td><button onclick="saveChanges(this)">Save</button></td>
-                </tr>
-                {% endfor %}
+            <table class="striped centered">
+                <thead>
+                    <tr>
+                        <th>Mentor Name</th>
+                        <th>Job Description</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for mentor in mentors_data %}
+                    <tr data-id="{{ mentor.mentor.id }}">
+                        <td contenteditable="true" class="editable" data-column="name">{{ mentor.mentor.name }}</td>
+                        <td contenteditable="true" class="editable" data-column="job_description">{{ mentor.mentor.job_description }}</td>
+                        <td><button onclick="saveChanges(this)">Save</button></td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
             </table>
         </div>
 
+        <h2>Mentee Rankings</h2>
         <div class="table-container">
-            <table class="striped">
+            <table class="striped centered">
                 <thead>
                     <tr>
                         <th>Mentee Name</th>
                         {% for mentor in mentors_data %}
                         <th>Ranking for {{ mentor.mentor.name }}</th>
                         {% endfor %}
+                        <th>Actions</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -55,8 +120,9 @@
         </div>
 
         <!-- New Table for Mentor Availability by Timeslot -->
+        <h2>Mentor Availability</h2>
         <div class="table-container">
-            <table class="striped">
+            <table class="striped centered">
                 <thead>
                     <tr>
                         <th>Timeslot</th>
@@ -73,7 +139,7 @@
                         <td>
                             <label>
                                 <input type="checkbox" class="filled-in" data-timeslot="{{ timeslot }}"
-                                {{ 'checked' if timeslot in mentor. timeslots else '' }} onchange="updateAvailability(this, '{{ mentor.mentor.id }}', '{{ timeslot }}')"/>
+                                {{ 'checked' if timeslot in mentor.timeslots else '' }} onchange="updateAvailability(this, '{{ mentor.mentor.id }}', '{{ timeslot }}')"/>
                                 <span></span>
                             </label>
                         </td>
@@ -85,6 +151,7 @@
         </div>
     </div>
 
+    <!-- Materialize JS -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
     <script>
         function updateAvailability(checkbox, mentorId, timeslot) {
@@ -101,15 +168,15 @@
             }).then(response => response.json())
             .then(data => {
                 if (data.success) {
-                    Materialize.toast('Availability updated successfully!', 4000);
+                    M.toast({html: 'Availability updated successfully!'});
                 } else {
-                    Materialize.toast('Failed to update availability.', 4000);
+                    M.toast({html: 'Failed to update availability.'});
                     checkbox.checked = !checkbox.checked; // Revert the checkbox state if the update fails
                 }
             })
             .catch(error => {
                 console.error('Error:', error);
-                Materialize.toast('An error occurred while updating.', 4000);
+                M.toast({html: 'An error occurred while updating.'});
                 checkbox.checked = !checkbox.checked; // Revert the checkbox state on error
             });
         }

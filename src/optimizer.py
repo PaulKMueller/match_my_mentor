@@ -85,7 +85,7 @@ class Optimizer:
         # Fetch all mentors and mentees first to avoid repeated database queries
         mentor_names = {mentor.id: mentor.name for mentor in Mentor.query.all()}
         mentee_names = {mentee.id: mentee.name for mentee in Mentee.query.all()}
-        time_slot_names = {time_slot.id: f"{time_slot.start_time}-{time_slot.end_time}" for time_slot in TimeSlot.query.all()}
+        time_slot_names = {time_slot.id: f"{time_slot.start_time.strftime('%H:%M')}-{time_slot.end_time.strftime('%H:%M')}" for time_slot in TimeSlot.query.all()}
         
         results_by_timeslot = {}
         for timeslot in self.timeslots:
