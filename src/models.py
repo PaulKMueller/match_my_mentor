@@ -11,7 +11,7 @@ mentor_timeslot = db.Table('mentor_timeslot',
 class Mentor(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(100), nullable=False)
-    job_description = db.Column(db.Text, nullable=False)
+    job_description = db.Column(db.String(300), nullable=False)
     timeslots = db.relationship(
         'TimeSlot',
         secondary=mentor_timeslot,
