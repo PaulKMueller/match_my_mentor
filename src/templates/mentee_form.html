@@ -1,11 +1,9 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Mentee Form</title>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css" rel="stylesheet">
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 
     <!-- Favicon code -->
@@ -15,6 +13,13 @@
     <link rel="manifest" href="{{ url_for('static', filename='site.webmanifest') }}">
 
     <style>
+        body {
+            background-color: #f5f5f5;
+            font-family: 'Roboto', sans-serif;
+            margin: 0;
+            padding: 0;
+        }
+
         .container {
             margin-top: 50px;
             max-width: 800px;
@@ -22,10 +27,50 @@
             padding: 40px;
             border-radius: 10px;
             box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            margin-left: auto;
+            margin-right: auto;
         }
-        .body {
-            background-color: #f5f5f5;
-            font-family: 'Roboto', sans-serif;
+
+        h2, p {
+            text-align: center;
+        }
+
+        .form-row {
+            margin: 15px 0;
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+        }
+
+        label {
+            font-weight: bold;
+            margin-bottom: 5px;
+            color: #333;
+        }
+
+        input[type="text"], select {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            font-size: 1rem;
+        }
+
+        .btn {
+            background-color: #007bff;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 1rem;
+            text-align: center;
+            display: inline-block;
+            transition: background-color 0.3s;
+        }
+
+        .btn:hover {
+            background-color: #0056b3;
         }
     </style>
 </head>
@@ -33,40 +78,22 @@
 <body>
     <div class="container">
         <h2>Rate your Mentors</h2>
-        <p>You can assign different preferences to different mentors. The preferences are given in German grades 1-6.
-            With 1 being the best and 6 being the worst.</p>
+        <p>You can assign different preferences to different mentors. The preferences are given in German grades 1-6, with 1 being the best and 6 being the worst.</p>
         <form action="" method="post" class="mentee-form">
-            <div class="row">
-                <div class="input-field col s12 m8 l10 offset-m2 offset-l1">
-                    {{ form.name.label(class="active") }}
-                    {{ form.name(class="validate", required=True) }}
-                </div>
+            <div class="form-row">
+                <label for="{{ form.name.id }}">{{ form.name.label }}</label>
+                {{ form.name(class="validate", id=form.name.id, required=True) }}
             </div>
             {% for mentor_name, mentor_form in mentors_and_forms %}
-            <div class="row">
-                <div class="input-field col s12 m8 l10 offset-m2 offset-l1">
-                    <p for="{{ mentor_form.rating.id }}">{{ mentor_name }}</p>
-                    {{ mentor_form.rating(class="validate", id=mentor_form.rating.id, required=True) }}
-                </div>
+            <div class="form-row">
+                <label for="{{ mentor_form.rating.id }}">{{ mentor_name }}</label>
+                {{ mentor_form.rating(id=mentor_form.rating.id, required=True) }}
             </div>
             {% endfor %}
-            <div class="row">
-                <div class="input-field col s12 m8 l10 offset-m2 offset-l1">
-                    <button type="submit" class="btn waves-effect waves-light">Submit
-                    </button>
-                </div>
+            <div class="form-row">
+                <button type="submit" class="btn">Submit</button>
             </div>
         </form>
     </div>
-
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
-    <script>
-        document.addEventListener('DOMContentLoaded', function () {
-            var elems = document.querySelectorAll('select');
-            var instances = M.FormSelect.init(elems);
-        });
-
-    </script>
 </body>
-
 </html>
