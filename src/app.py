@@ -407,8 +407,10 @@ def mentee_form():
                 "error",
             )
 
-    mentor_names = [mentor.name for mentor in mentors]
-    mentors_and_forms = zip(mentor_names, form.mentor_ratings)
+    # Include job descriptions in the list
+    mentors_and_forms = [(mentor.name, mentor.job_description, mentor_form)
+                         for mentor, mentor_form in zip(mentors, form.mentor_ratings)]
+
     return render_template(
         "mentee_form.html", form=form, mentors_and_forms=mentors_and_forms
     )
@@ -416,19 +418,41 @@ def mentee_form():
 @main.route('/reset-database', methods=['POST'])
 def reset_database():
     try:
-        # Delete all data from the tables
-        Mentor.query.delete()
-        Mentee.query.delete()
-        TimeSlot.query.delete()
-        Rating.query.delete()
-        
-        # Commit the changes to the database
-        db.session.commit()
+        db.drop_all()
+        db.create_all()
         return jsonify({'success': True})
     except Exception as e:
         print(f"Error resetting database: {e}")
         db.session.rollback()
         return jsonify({'success': False}), 500
+
+@main.route("/matching_old")
+def matching_old():
+    mentors_timeslots = (
+        db.session.query(Mentor.id, TimeSlot.id, TimeSlot.start_time, TimeSlot.end_time)
+        .join(Mentor.timeslots)
+        .all()
+    )
+    mentee_ratings = (
+        db.session.query(Mentee.id, Rating.mentor_id, Rating.rating)
+        .join(Mentee.ratings)
+        .all()
+    )
+    # Prepare data for the optimizer
+    data = prepare_data_for_optimizer(
+        mentors_timeslots, mentee_ratings
+    )  # You need to define this based on your needs
+
+    optimizer = Optimizer(data)
+    optimizer.solve()
+
+    # Fetch results from the optimizer
+    results = (
+        optimizer.get_results()
+    )  # You would need to add a method to extract formatted results
+
+    return render_template("matching_old.html", results=results)
+
 
 @main.route("/matching")
 def matching():
@@ -446,16 +470,18 @@ def matching():
     data = prepare_data_for_optimizer(
         mentors_timeslots, mentee_ratings
     )  # You need to define this based on your needs
-    print(data)
+
     optimizer = Optimizer(data)
     optimizer.solve()
+    results_by_mentor = optimizer.get_results_by_mentor()
 
-    # Fetch results from the optimizer
-    results = (
-        optimizer.get_results()
-    )  # You would need to add a method to extract formatted results
+    print(results_by_mentor)
 
-    return render_template("matching.html", results=results)
+    # Extract the unique list of timeslots from the results
+    timeslots = list(next(iter(results_by_mentor.values())).keys())
+
+    # Pass both the results and timeslots to the template
+    return render_template("matching.html", results=results_by_mentor, timeslots=timeslots)
 
 
 if __name__ == "__main__":
