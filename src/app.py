@@ -1,3 +1,5 @@
+import datetime
+import logging
 from flask import Flask, render_template, redirect, url_for, flash, request, jsonify
 from .forms import MentorForm, MenteeForm, MentorRatingForm, TimeSlotsForm
 from flask_sqlalchemy import SQLAlchemy
@@ -60,46 +62,6 @@ def setup():
     return render_template("setup.html", form=form)
 
 
-@main.route("/timeslots", methods=["GET", "POST"])
-def manage_timeslots():
-    form = TimeSlotsForm()
-
-    # Pre-fill the form with existing timeslots from the database
-    if request.method == "GET":
-        timeslots = TimeSlot.query.all()
-        for timeslot in timeslots:
-            form.timeslots.append_entry(
-                {
-                    "timeslot_id": timeslot.id,
-                    "start_time": timeslot.start_time,
-                    "end_time": timeslot.end_time,
-                }
-            )
-
-    # Handle form submission
-    if form.validate_on_submit():
-        for entry in form.timeslots:
-            timeslot_id = entry.timeslot_id.data
-            start_time = entry.start_time.data
-            end_time = entry.end_time.data
-
-            # Update existing time slot or create a new one
-            if timeslot_id:
-                timeslot = TimeSlot.query.get(timeslot_id)
-                if timeslot:
-                    timeslot.start_time = start_time
-                    timeslot.end_time = end_time
-            else:
-                new_timeslot = TimeSlot(start_time=start_time, end_time=end_time)
-                db.session.add(new_timeslot)
-
-        db.session.commit()
-        flash("Time slots updated successfully!", "success")
-        return redirect(url_for("manage_timeslots"))
-
-    return render_template("setup.html", form=form)
-
-
 @main.route('/delete-timeslot', methods=['POST'])
 def delete_timeslot():
     data = request.get_json()
@@ -113,6 +75,52 @@ def delete_timeslot():
             return jsonify(success=True)
 
     return jsonify(success=False)
+
+@main.route("/delete-mentor", methods=["POST"])
+def delete_mentor():
+    try:
+        data = request.get_json()
+        mentor_id = data.get("id")  # Expecting 'id' instead of 'mentor_id'
+        mentor = Mentor.query.get(mentor_id)
+
+        if not mentor:
+            return jsonify({"success": False, "message": "Mentor not found"}), 404
+
+        # Delete associated ratings for this mentor
+        Rating.query.filter_by(mentor_id=mentor_id).delete()
+
+        # Remove the mentor from any timeslots they're associated with
+        mentor.timeslots.clear()
+
+        # Now delete the mentor
+        db.session.delete(mentor)
+        db.session.commit()
+        return jsonify({"success": True, "message": "Mentor deleted successfully"})
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({"success": False, "message": str(e)}), 500
+
+
+@main.route("/delete-mentee", methods=["POST"])
+def delete_mentee():
+    try:
+        data = request.get_json()
+        mentee_id = data.get("id")  # Expecting 'id' instead of 'mentee_id'
+        mentee = Mentee.query.get(mentee_id)
+
+        if not mentee:
+            return jsonify({"success": False, "message": "Mentee not found"}), 404
+
+        # Delete associated ratings for this mentee
+        Rating.query.filter_by(mentee_id=mentee_id).delete()
+
+        # Now delete the mentee
+        db.session.delete(mentee)
+        db.session.commit()
+        return jsonify({"success": True, "message": "Mentee deleted successfully"})
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({"success": False, "message": str(e)}), 500
 
 
 @main.route("/update-mentee-rankings", methods=["POST"])
@@ -163,46 +171,60 @@ def update_availability():
         timeslot = data["timeslot"]
         is_available = data["is_available"]
 
+        # Debugging Output
+        logging.info(f"Received Data: mentor_id={mentor_id}, timeslot={timeslot}, is_available={is_available}")
+
+        # Assuming the format 'HH:MM-HH:MM', parse start_time and end_time
+        try:
+            start_time_str, end_time_str = timeslot.split("-")
+            start_time = datetime.datetime.strptime(start_time_str, "%H:%M").time()
+            end_time = datetime.datetime.strptime(end_time_str, "%H:%M").time()
+        except ValueError as e:
+            logging.error(f"Error parsing timeslot string: {e}")
+            return jsonify({"success": False, "message": "Invalid timeslot format"}), 400
+
+        # Query Mentor and Timeslot
         mentor = Mentor.query.get(mentor_id)
-        timeslot_entry = TimeSlot.query.filter_by(
-            start_time=timeslot.split("-")[0], end_time=timeslot.split("-")[1]
-        ).first()
+        timeslot_entry = TimeSlot.query.filter_by(start_time=start_time, end_time=end_time).first()
 
         if not mentor or not timeslot_entry:
-            return (
-                jsonify({"success": False, "message": "Mentor or timeslot not found"}),
-                404,
-            )
+            logging.warning("Mentor or timeslot not found.")
+            return jsonify({"success": False, "message": "Mentor or timeslot not found"}), 404
 
+        # Update availability
         if is_available:
             if timeslot_entry not in mentor.timeslots:
                 mentor.timeslots.append(timeslot_entry)
+                logging.info(f"Added timeslot {timeslot} to mentor {mentor_id}.")
         else:
             if timeslot_entry in mentor.timeslots:
                 mentor.timeslots.remove(timeslot_entry)
+                logging.info(f"Removed timeslot {timeslot} from mentor {mentor_id}.")
 
         db.session.commit()
-        return jsonify(
-            {"success": True, "message": "Availability updated successfully"}
-        )
+        return jsonify({"success": True, "message": "Availability updated successfully"})
+
     except Exception as e:
         db.session.rollback()
+        logging.error(f"Exception during update availability: {e}")
         return jsonify({"success": False, "message": str(e)}), 500
 
 
 @main.route("/update-mentor", methods=["POST"])
 def update_mentor():
     data = request.json
-    mentor_id = data["id"]
+    logging.info(f"Received data: {data}")
+    print(f"Received data: {data}")
+    mentor_id = data.get("id")
+
+    print(f"Updating mentor with ID: {mentor_id} and job description: {data.get('job_description')}")
     mentor = Mentor.query.get(mentor_id)
     if mentor:
         mentor.name = data.get("name", mentor.name)
-        mentor.job_description = data.get("job_description", mentor.job_description)
-        # You would also handle the timeslots here, possibly requiring additional logic
-
+        mentor.job_description = data.get("jobDescription", mentor.job_description)
         db.session.commit()
-        return jsonify({"message": "Mentor updated successfully"}), 200
-    return jsonify({"message": "Mentor not found"}), 404
+        return jsonify({"success": True, "message": "Mentor updated successfully"}), 200
+    return jsonify({"success": False, "message": "Mentor not found"}), 404
 
 
 @main.route("/update-mentee", methods=["POST"])
@@ -244,9 +266,7 @@ def admin():
     # Prepare data for the template
     mentors_data = []
     for mentor in mentors_with_timeslots:
-        timeslots = ", ".join(
-            [f"{ts.start_time}-{ts.end_time}" for ts in mentor.timeslots]
-        )
+        timeslots = [f"{ts.start_time.strftime('%H:%M')}-{ts.end_time.strftime('%H:%M')}" for ts in mentor.timeslots]
         mentors_data.append({"mentor": mentor, "timeslots": timeslots})
 
     mentees_with_rankings = Mentee.query.all()
@@ -257,12 +277,14 @@ def admin():
         rankings = {rating.mentor_id: rating.rating for rating in mentee.ratings}
         mentees_data.append({"mentee": mentee, "rankings": rankings})
 
+    all_timeslots = [f"{ts.start_time.strftime('%H:%M')}-{ts.end_time.strftime('%H:%M')}" for ts in TimeSlot.query.all()]
+
     return render_template(
         "admin.html",
         form=form,
         mentors_data=mentors_data,
         mentees_data=mentees_data,
-        all_timeslots=[f"{ts.start_time}-{ts.end_time}" for ts in TimeSlot.query.all()],
+        all_timeslots=all_timeslots,
     )
 
 
@@ -385,8 +407,10 @@ def mentee_form():
                 "error",
             )
 
-    mentor_names = [mentor.name for mentor in mentors]
-    mentors_and_forms = zip(mentor_names, form.mentor_ratings)
+    # Include job descriptions in the list
+    mentors_and_forms = [(mentor.name, mentor.job_description, mentor_form)
+                         for mentor, mentor_form in zip(mentors, form.mentor_ratings)]
+
     return render_template(
         "mentee_form.html", form=form, mentors_and_forms=mentors_and_forms
     )
@@ -394,19 +418,41 @@ def mentee_form():
 @main.route('/reset-database', methods=['POST'])
 def reset_database():
     try:
-        # Delete all data from the tables
-        Mentor.query.delete()
-        Mentee.query.delete()
-        TimeSlot.query.delete()
-        Rating.query.delete()
-        
-        # Commit the changes to the database
-        db.session.commit()
+        db.drop_all()
+        db.create_all()
         return jsonify({'success': True})
     except Exception as e:
         print(f"Error resetting database: {e}")
         db.session.rollback()
         return jsonify({'success': False}), 500
+
+@main.route("/matching_old")
+def matching_old():
+    mentors_timeslots = (
+        db.session.query(Mentor.id, TimeSlot.id, TimeSlot.start_time, TimeSlot.end_time)
+        .join(Mentor.timeslots)
+        .all()
+    )
+    mentee_ratings = (
+        db.session.query(Mentee.id, Rating.mentor_id, Rating.rating)
+        .join(Mentee.ratings)
+        .all()
+    )
+    # Prepare data for the optimizer
+    data = prepare_data_for_optimizer(
+        mentors_timeslots, mentee_ratings
+    )  # You need to define this based on your needs
+
+    optimizer = Optimizer(data)
+    optimizer.solve()
+
+    # Fetch results from the optimizer
+    results = (
+        optimizer.get_results()
+    )  # You would need to add a method to extract formatted results
+
+    return render_template("matching_old.html", results=results)
+
 
 @main.route("/matching")
 def matching():
@@ -424,16 +470,18 @@ def matching():
     data = prepare_data_for_optimizer(
         mentors_timeslots, mentee_ratings
     )  # You need to define this based on your needs
-    print(data)
+
     optimizer = Optimizer(data)
     optimizer.solve()
+    results_by_mentor = optimizer.get_results_by_mentor()
 
-    # Fetch results from the optimizer
-    results = (
-        optimizer.get_results()
-    )  # You would need to add a method to extract formatted results
+    print(results_by_mentor)
 
-    return render_template("matching.html", results=results)
+    # Extract the unique list of timeslots from the results
+    timeslots = list(next(iter(results_by_mentor.values())).keys())
+
+    # Pass both the results and timeslots to the template
+    return render_template("matching.html", results=results_by_mentor, timeslots=timeslots)
 
 
 if __name__ == "__main__":

@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -31,7 +32,8 @@
             margin-right: auto;
         }
 
-        h2, p {
+        h2,
+        p {
             text-align: center;
         }
 
@@ -48,7 +50,8 @@
             color: #333;
         }
 
-        input[type="text"], select {
+        input[type="text"],
+        select {
             width: 100%;
             padding: 10px;
             border: 1px solid #ccc;
@@ -72,21 +75,31 @@
         .btn:hover {
             background-color: #0056b3;
         }
+
+        .job-description {
+            font-size: 0.9em;
+            color: #666;
+            margin-top: -5px;
+            margin-bottom: 10px;
+        }
     </style>
 </head>
 
 <body>
     <div class="container">
         <h2>Rate your Mentors</h2>
-        <p>You can assign different preferences to different mentors. The preferences are given in German grades 1-6, with 1 being the best and 6 being the worst.</p>
+        <p>You can assign different preferences to different mentors.<br>
+        The preferences are given in German grades 1-6.<br>
+            1 is the best and 6 the worst.</p>
         <form action="" method="post" class="mentee-form">
             <div class="form-row">
                 <label for="{{ form.name.id }}">{{ form.name.label }}</label>
                 {{ form.name(class="validate", id=form.name.id, required=True) }}
             </div>
-            {% for mentor_name, mentor_form in mentors_and_forms %}
+            {% for mentor_name, job_description, mentor_form in mentors_and_forms %}
             <div class="form-row">
                 <label for="{{ mentor_form.rating.id }}">{{ mentor_name }}</label>
+                <p class="job-description">{{ job_description }}</p>
                 {{ mentor_form.rating(id=mentor_form.rating.id, required=True) }}
             </div>
             {% endfor %}
@@ -96,4 +109,5 @@
         </form>
     </div>
 </body>
+
 </html>
